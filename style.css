@@ -1,0 +1,56 @@
+#widget {
+    margin: 10em auto;
+}
+#type {
+    background-color: white;
+    border: 1px solid #999;
+    font-family: Consolas, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
+    font-size: 14pt;
+    padding: 10px;
+    white-space: pre-wrap;
+}
+#type.completed {
+    background-color: #cf9;
+}
+#type .cursor {
+    animation: blink 1s steps(2, start) infinite;
+    -webkit-animation: blink 1s steps(2, start) infinite;
+    background-color: black;
+    display: inline-block;
+    height: 1em;
+    margin-top: 2pt;
+    position: absolute;
+    width: 2px;
+}
+@keyframes blink {
+    to { visibility: hidden; }
+}
+@-webkit-keyframes blink {
+    to { visibility: hidden; }
+}
+#type .correct {
+    color: black;
+}
+#type .incorrect {
+    background-color: red;
+    color: black;
+}
+#type .not-yet-typed {
+    color: #999;
+}
+#stats {
+    background-color: #eee;
+    padding: 1em;
+}
+#stats .stat {
+    font-size: 10pt;
+    font-weight: bold;
+    text-align: center;
+}
+#stats .value {
+    font-size: 14pt;
+    text-align: center;
+}
+#paragraphs {
+    margin-top: 1em;
+}

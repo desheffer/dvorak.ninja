@@ -1,3 +1,6 @@
+a {
+    text-decoration: underline;
+}
 #widget {
     margin: 10em auto;
 }
@@ -6,11 +9,17 @@
     border: 1px solid #999;
     font-family: Consolas, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
     font-size: 14pt;
+    min-height: 10em;
     padding: 10px;
     white-space: pre-wrap;
 }
 #type.completed {
     background-color: #cf9;
+}
+#type .countdown {
+    font-size: 32pt;
+    margin-top: 1em;
+    text-align: center;
 }
 #type .cursor {
     animation: blink 1s steps(2, start) infinite;

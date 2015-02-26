@@ -37,7 +37,10 @@
                     <div class="value"></div>
                     <div class="stat">WPM</div>
                 </div>
-                <div class="col-md-4"></div>
+                <div class="col-md-2 wpm-meter">
+                    <meter value="0" low="0.3" high="0.7" optimum="1"></meter>
+                </div>
+                <div class="col-md-2"></div>
                 <div class="col-md-2 characters">
                     <div class="value"></div>
                     <div class="stat">Characters</div>
@@ -54,20 +57,26 @@
 
             <div class="row">
                 <div class="col-md-offset-1 col-md-5 layout">
+                    <h4>Qwerty</h4>
 
-                Qwerty
-
-Q   W   E   R   T   Y   U   I   O   P   [   ]
- A   S   D   <u>F</u>   G   H   <u>J</u>   K   L   ;   '
-  Z   X   C   V   B   N   M   ,   .   /
+                    <div class="keys">
+                        Q&nbsp;&nbsp;&nbsp;W&nbsp;&nbsp;&nbsp;E&nbsp;&nbsp;&nbsp;R&nbsp;&nbsp;&nbsp;T&nbsp;&nbsp;&nbsp;Y&nbsp;&nbsp;&nbsp;U&nbsp;&nbsp;&nbsp;I&nbsp;&nbsp;&nbsp;O&nbsp;&nbsp;&nbsp;P&nbsp;&nbsp;&nbsp;[&nbsp;&nbsp;&nbsp;]<br/>
+                        <span class="home">&nbsp;A&nbsp;&nbsp;&nbsp;S&nbsp;&nbsp;&nbsp;D&nbsp;&nbsp;&nbsp;<u>F</u>&nbsp;</span>&nbsp;&nbsp;G&nbsp;&nbsp;&nbsp;H&nbsp;&nbsp;<span class="home">&nbsp;<u>J</u>&nbsp;&nbsp;&nbsp;K&nbsp;&nbsp;&nbsp;L&nbsp;&nbsp;&nbsp;;&nbsp;</span>&nbsp;&nbsp;'<br/>
+                        &nbsp;&nbsp;Z&nbsp;&nbsp;&nbsp;X&nbsp;&nbsp;&nbsp;C&nbsp;&nbsp;&nbsp;V&nbsp;&nbsp;&nbsp;B&nbsp;&nbsp;&nbsp;N&nbsp;&nbsp;&nbsp;M&nbsp;&nbsp;&nbsp;,&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;/
+                    </div>
                 </div>
                 <div class="col-md-5 layout">
+                    <h4>Dvorak</h4>
 
-                Dvorak
+                    <div class="keys">
+                        '&nbsp;&nbsp;&nbsp;,&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;P&nbsp;&nbsp;&nbsp;Y&nbsp;&nbsp;&nbsp;F&nbsp;&nbsp;&nbsp;G&nbsp;&nbsp;&nbsp;C&nbsp;&nbsp;&nbsp;R&nbsp;&nbsp;&nbsp;L&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;=
+                        <span class="home">&nbsp;A&nbsp;&nbsp;&nbsp;O&nbsp;&nbsp;&nbsp;E&nbsp;&nbsp;&nbsp;<u>U</u>&nbsp;</span>&nbsp;&nbsp;I&nbsp;&nbsp;&nbsp;D&nbsp;&nbsp;<span class="home">&nbsp;<u>H</u>&nbsp;&nbsp;&nbsp;T&nbsp;&nbsp;&nbsp;N&nbsp;&nbsp;&nbsp;S&nbsp;</span>&nbsp;&nbsp;-
+                        &nbsp;&nbsp;;&nbsp;&nbsp;&nbsp;Q&nbsp;&nbsp;&nbsp;J&nbsp;&nbsp;&nbsp;K&nbsp;&nbsp;&nbsp;X&nbsp;&nbsp;&nbsp;B&nbsp;&nbsp;&nbsp;M&nbsp;&nbsp;&nbsp;W&nbsp;&nbsp;&nbsp;V&nbsp;&nbsp;&nbsp;Z
+                    </div>
 
-'   ,   .   P   Y   F   G   C   R   L   /   =
- A   O   E   <u>U</u>   I   D   <u>H</u>   T   N   S   -
-  ;   Q   J   K   X   B   M   W   V   Z
+                    <label class="map">
+                        <input id="map-dvorak" type="checkbox" /> map from Qwerty
+                    </label>
                 </div>
             <div>
         </div>

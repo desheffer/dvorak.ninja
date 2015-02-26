@@ -67,10 +67,25 @@ body {
     font-size: 14pt;
     text-align: center;
 }
+#stats .wpm-meter meter {
+    margin-top: 2em;
+    width: 100%;
+}
 #paragraphs {
     margin-top: 1em;
 }
 .layout {
-    font-family: Consolas, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
-    white-space: pre-wrap;
+    margin-top: 5em;
+}
+.layout .map {
+    cursor: pointer;
+    margin-left: 6em;
+}
+.layout .keys {
+    color: #999;
+    margin: 1em auto;
+}
+.layout .keys .home {
+    background-color: #eee;
+    color: black;
 }

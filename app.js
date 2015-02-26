@@ -4,6 +4,8 @@
     }
 
     var keyboardMapper = (function() {
+        var layoutMapper = null;
+
         var normalLayer = {
             32: ' ',
             48: '0', 49: '1', 50: '2', 51: '3', 52: '4',
@@ -36,11 +38,39 @@
 
         return {
             fromCharCode: function(keyCode, shiftKey) {
-                if (shiftKey) {
-                    return shiftLayer[keyCode];
+                var char = shiftKey ? shiftLayer[keyCode] : normalLayer[keyCode];
+
+                if (layoutMapper !== null) {
+                    return layoutMapper.map(char);
                 } else {
-                    return normalLayer[keyCode];
+                    return char;
                 }
+            },
+            setLayoutMapper: function(aLayoutMapper) {
+                layoutMapper = aLayoutMapper;
+            },
+        };
+    })();
+
+    var dvorakLayoutMapper = (function() {
+        var map = {
+            'a': 'a', 'A': 'A', 'b': 'x', 'B': 'X', 'c': 'j', 'C': 'J',
+            'd': 'e', 'D': 'E', 'e': '.', 'E': '>', 'f': 'u', 'F': 'U',
+            'g': 'i', 'G': 'I', 'h': 'd', 'H': 'D', 'i': 'c', 'I': 'C',
+            'j': 'h', 'J': 'H', 'k': 't', 'K': 'T', 'l': 'n', 'L': 'N',
+            'm': 'm', 'M': 'M', 'n': 'b', 'N': 'B', 'o': 'r', 'O': 'R',
+            'p': 'l', 'P': 'L', 'q': '\'', 'Q': '"', 'r': 'p', 'R': 'P',
+            's': 'o', 'S': 'O', 't': 'y', 'T': 'Y', 'u': 'g', 'U': 'G',
+            'v': 'k', 'V': 'K', 'w': ',', 'W': '<', 'x': 'q', 'X': 'Q',
+            'y': 'f', 'Y': 'F', 'z': ';', 'Z': ';', '-': '[', '_': '{',
+            '=': ']', '+': '}', '[': '/', '{': '?', ']': '=', '}': '+',
+            ';': 's', ':': 'S', '\'': '-', '"': '_', ',': 'w', '<': 'W',
+            '.': 'v', '>': 'V', '/': 'z', '?': 'Z',
+        };
+
+        return {
+            map: function(char) {
+                return map[char] ? map[char] : char;
             },
         };
     })();
@@ -50,10 +80,18 @@
         var stats = $('#stats');
 
         function renderStats(wpm, characters, words, seconds) {
+            if (!isFinite(wpm)) {
+                wpm = 0;
+            }
+
             stats.find('.wpm .value').text(wpm);
             stats.find('.characters .value').text(characters);
             stats.find('.words .value').text(words);
             stats.find('.seconds .value').text(seconds);
+
+            // Scale of [0, 1) with 60 WPM at 0.5.
+            var meter = 1 - 60 / (wpm + 60);
+            stats.find('.wpm-meter meter').val(meter);
         }
 
         return {
@@ -68,7 +106,7 @@
                     type.html('<div class="overlay"></div>');
                 }
 
-                type.find('.overlay').text(seconds);
+                type.find('.overlay').text(Math.ceil(seconds));
 
                 type.removeClass('completed');
 
@@ -87,14 +125,16 @@
 
                 type.toggleClass('completed', isCompleted);
 
-                var remaning = notYetTyped.substr(incorrectlyTyped.length)
+                var remaining = notYetTyped.substr(incorrectlyTyped.length)
                 type.find('.correct').text(correctlyTyped);
                 type.find('.incorrect').text(incorrectlyTyped);
-                type.find('.remaining').text(notYetTyped);
+                type.find('.remaining').text(remaining);
 
+                seconds = Math.floor(seconds);
                 var characters = correctlyTyped.length;
                 var words = correctlyTyped.length / 5;
                 var wpm = words / (seconds / 60);
+
                 renderStats(
                     Math.round(wpm ? wpm : 0),
                     Math.round(characters),
@@ -126,11 +166,9 @@
             var isCompleted = (!isCountdown && notYetTyped === '');
 
             if (isCountdown) {
-                var seconds = Math.ceil(startTime - now);
-                typeBox.renderCountdown(seconds);
+                typeBox.renderCountdown(startTime - now);
             } else if (isActive || isCompleted) {
-                var seconds = Math.floor(now - startTime);
-                typeBox.renderProgress(isCompleted, correctlyTyped, incorrectlyTyped, notYetTyped, seconds);
+                typeBox.renderProgress(isCompleted, correctlyTyped, incorrectlyTyped, notYetTyped, now - startTime);
             } else {
                 typeBox.renderInitial();
             }
@@ -208,6 +246,13 @@
 
     $('#paragraphs a').on('click', function() {
         controller.start($(this).data('paragraph'), 3);
+        $(this).blur();
+        return false;
+    });
+
+    $('#map-dvorak').on('change', function() {
+        var layoutMapper = $(this).is(':checked') ? dvorakLayoutMapper : null;
+        keyboardMapper.setLayoutMapper(layoutMapper);
         $(this).blur();
         return false;
     });

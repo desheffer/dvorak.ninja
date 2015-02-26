@@ -3,10 +3,8 @@
         return new Date().getTime() / 1000;
     }
 
-    function fromCharCode(keyCode, shiftKey) {
-        var layers = {};
-
-        layers.normal = {
+    var keyboardMapper = (function() {
+        var normalLayer = {
             32: ' ',
             48: '0', 49: '1', 50: '2', 51: '3', 52: '4',
             53: '5', 54: '6', 55: '7', 56: '8', 57: '9',
@@ -21,7 +19,7 @@
             222: '\'',
         };
 
-        layers.shift = {
+        var shiftLayer = {
             32: ' ',
             48: ')', 49: '!', 50: '@', 51: '#', 52: '$',
             53: '%', 54: '^', 55: '&', 56: '*', 57: '(',
@@ -36,91 +34,143 @@
             222: '"',
         };
 
-        if (shiftKey) {
-            return layers.shift[keyCode];
-        } else {
-            return layers.normal[keyCode];
-        }
-    }
-
-    var view = (function() {
         return {
-            render: function(started, completed, correctlyTyped, incorrectlyTyped, notYetTyped, seconds) {
-                if (completed) {
-                    $('#type').html(
-                        '<span class="correct">' + correctlyTyped + '</span>'
-                    );
+            fromCharCode: function(keyCode, shiftKey) {
+                if (shiftKey) {
+                    return shiftLayer[keyCode];
                 } else {
-                    $('#type').html(
-                        '<span class="correct">' + correctlyTyped + '</span>'
-                        + '<span class="incorrect">' + incorrectlyTyped + '</span>'
-                        + '<span class="cursor"></span>'
-                        + '<span class="not-yet-typed">' + notYetTyped.substr(incorrectlyTyped.length) + '</span>'
-                    );
+                    return normalLayer[keyCode];
                 }
-
-                $('#type').toggleClass('completed', completed);
-
-                var words = correctlyTyped.length / 5;
-                var wpm = words / (seconds / 60);
-                $('#stats .wpm .value').text(Math.round(wpm ? wpm : 0));
-                $('#stats .characters .value').text(Math.round(correctlyTyped.length));
-                $('#stats .words .value').text(Math.floor(words));
-                $('#stats .seconds .value').text(seconds);
             },
         };
     })();
 
-    var controller = (function(view) {
-        var wordsToType = '';
-        var correctlyTyped = '';
-        var incorrectlyTyped = '';
-        var notYetTyped = '';
-        var startTime = null;
+    var typeBox = (function() {
+        var type = $('#type');
+        var stats = $('#stats');
 
-        function started() {
-            return wordsToType.length > 0;
-        }
-
-        function completed() {
-            return started() && notYetTyped.length == 0;
-        }
-
-        function triggerRender() {
-            var seconds = Math.round(time() - startTime);
-
-            view.render(started(), completed(), correctlyTyped, incorrectlyTyped, notYetTyped, seconds);
+        function renderStats(wpm, characters, words, seconds) {
+            stats.find('.wpm .value').text(wpm);
+            stats.find('.characters .value').text(characters);
+            stats.find('.words .value').text(words);
+            stats.find('.seconds .value').text(seconds);
         }
 
         return {
-            start: function(words) {
-                wordsToType = words;
+            renderInitial: function () {
+                type.removeClass('completed');
 
-                correctlyTyped = '';
-                incorrectlyTyped = '';
-                notYetTyped = wordsToType;
-                startTime = time();
+                renderStats('--', '--', '--', '--');
+            },
+            renderCountdown: function (seconds) {
+                if (type.data('mode') !== 'countdown') {
+                    type.data('mode', 'countdown');
+                    type.html('<div class="overlay"></div>');
+                }
 
-                triggerRender();
+                type.find('.overlay').text(seconds);
+
+                type.removeClass('completed');
+
+                renderStats(0, 0, 0, 0);
+            },
+            renderProgress: function(isCompleted, correctlyTyped, incorrectlyTyped, notYetTyped, seconds) {
+                if (type.data('mode') !== 'progress') {
+                    type.data('mode', 'progress');
+                    type.html(
+                        '<span class="correct"></span>'
+                        + '<span class="incorrect"></span>'
+                        + '<span class="cursor"></span>'
+                        + '<span class="remaining"></span>'
+                    );
+                }
+
+                type.toggleClass('completed', isCompleted);
+
+                var remaning = notYetTyped.substr(incorrectlyTyped.length)
+                type.find('.correct').text(correctlyTyped);
+                type.find('.incorrect').text(incorrectlyTyped);
+                type.find('.remaining').text(notYetTyped);
+
+                var characters = correctlyTyped.length;
+                var words = correctlyTyped.length / 5;
+                var wpm = words / (seconds / 60);
+                renderStats(
+                    Math.round(wpm ? wpm : 0),
+                    Math.round(characters),
+                    Math.floor(words),
+                    seconds
+                );
+            },
+        };
+    })();
+
+    var controller = (function(typeBox) {
+        var wordsToType = null;
+        var correctlyTyped = null;
+        var incorrectlyTyped = null;
+        var notYetTyped = null;
+        var startTime = null;
+
+        var isActive = false;
+        var timer = null;
+
+        tick();
+
+        function tick() {
+            var now = time();
+
+            isActive = (startTime !== null && now > startTime && notYetTyped !== null && notYetTyped !== '');
+
+            var isCountdown = (startTime !== null && now < startTime);
+            var isCompleted = (!isCountdown && notYetTyped === '');
+
+            if (isCountdown) {
+                var seconds = Math.ceil(startTime - now);
+                typeBox.renderCountdown(seconds);
+            } else if (isActive || isCompleted) {
+                var seconds = Math.floor(now - startTime);
+                typeBox.renderProgress(isCompleted, correctlyTyped, incorrectlyTyped, notYetTyped, seconds);
+            } else {
+                typeBox.renderInitial();
+            }
+
+            clearInterval(timer);
+            if (isCountdown || isActive) {
+                timer = setTimeout(tick, 100);
+            }
+        }
+
+        return {
+            start: function(words, timeout) {
+                if (timeout === undefined) {
+                    timeout = 0;
+                }
+
+                wordsToType = notYetTyped = words;
+                correctlyTyped = incorrectlyTyped = '';
+                startTime = time() + timeout;
+
+                tick();
             },
             letterTyped: function(letter) {
-                if (!started() || completed()) {
+                if (!isActive) {
                     return;
                 }
 
                 var expected = notYetTyped.substr(0, 1);
 
-                if (incorrectlyTyped.length == 0 && letter == expected) {
+                if (incorrectlyTyped.length === 0 && letter === expected) {
                     correctlyTyped = correctlyTyped + letter;
                     notYetTyped = notYetTyped.substr(1);
                 } else if (incorrectlyTyped.length <= 10) {
                     incorrectlyTyped = incorrectlyTyped + letter;
                 }
 
-                triggerRender();
+                tick();
             },
             backspaceTyped: function() {
-                if (!started() || completed()) {
+                if (!isActive) {
                     return;
                 }
 
@@ -131,10 +181,10 @@
                     correctlyTyped = correctlyTyped.substr(0, correctlyTyped.length - 1);
                 }
 
-                triggerRender();
+                tick();
             },
         };
-    })(view);
+    })(typeBox);
 
     $(document).on('keydown', function(e) {
         // Ignore keyboard shortcuts
@@ -143,33 +193,21 @@
         }
 
         // Backspace
-        if (e.keyCode == 8) {
+        if (e.keyCode === 8) {
             controller.backspaceTyped();
             return false;
         }
 
         // Normal keys
-        var letter = fromCharCode(e.keyCode, e.shiftKey);
+        var letter = keyboardMapper.fromCharCode(e.keyCode, e.shiftKey);
         if (letter) {
             controller.letterTyped(letter);
+            return false;
         }
     });
 
     $('#paragraphs a').on('click', function() {
-        var link = $(this);
-
-        var timeout = 3;
-        function countdown() {
-            if (timeout > 0) {
-                $('#type').html('<div class="countdown">' + timeout + '</div>');
-                timeout--;
-                setTimeout(countdown, 1000);
-            } else {
-                controller.start(link.data('paragraph'));
-            }
-        }
-        countdown();
-
+        controller.start($(this).data('paragraph'), 3);
         $(this).blur();
         return false;
     });

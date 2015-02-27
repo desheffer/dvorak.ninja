@@ -86,7 +86,7 @@
 
         return {
             map: function(char) {
-                return map[char] ? map[char] : char;
+                return map[char] !== undefined ? map[char] : char;
             },
         };
     })();
@@ -96,18 +96,11 @@
         var stats = $('#stats');
 
         function renderStats(wpm, characters, words, seconds) {
-            if (!isFinite(wpm)) {
-                wpm = 0;
-            }
-
             stats.find('.wpm .value').text(wpm);
+            stats.find('.wpm-meter meter').val(isFinite(wpm) ? wpm : 0);
             stats.find('.characters .value').text(characters);
             stats.find('.words .value').text(words);
             stats.find('.seconds .value').text(seconds);
-
-            // Scale of [0, 1) with 60 WPM at 0.5.
-            var meter = 1 - 60 / (wpm + 60);
-            stats.find('.wpm-meter meter').val(meter);
         }
 
         return {
@@ -146,16 +139,15 @@
                 type.find('.incorrect').text(incorrectlyTyped);
                 type.find('.remaining').text(remaining);
 
-                seconds = Math.floor(seconds);
                 var characters = correctlyTyped.length;
                 var words = correctlyTyped.length / 5;
                 var wpm = words / (seconds / 60);
 
                 renderStats(
                     Math.round(wpm ? wpm : 0),
-                    Math.round(characters),
+                    characters,
                     Math.floor(words),
-                    seconds
+                    Math.floor(seconds)
                 );
             },
         };
@@ -190,6 +182,8 @@
             }
 
             clearInterval(timer);
+            timer = null;
+
             if (isCountdown || isActive) {
                 timer = setTimeout(tick, 100);
             }

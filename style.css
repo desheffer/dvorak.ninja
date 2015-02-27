@@ -81,11 +81,25 @@ body {
     cursor: pointer;
     margin-left: 6em;
 }
-.layout .keys {
+.layout .keyboard {
     color: #999;
     margin: 1em auto;
 }
-.layout .keys .home {
+.layout .keyboard .row-1 {
+    padding-left: 0.8em;
+}
+.layout .keyboard .row-2 {
+    padding-left: 1.6em;
+}
+.layout .keyboard .key {
+    margin: 0 0.25em;
+    padding: 0 0.5em;
+}
+.layout .keyboard .home {
     background-color: #eee;
+    border-radius: 10px;
     color: black;
+}
+.layout .keyboard .bump {
+    text-decoration: underline;
 }

@@ -234,6 +234,39 @@
         };
     })(typeBox);
 
+    var keyboardLayout = (function() {
+        var layouts = {
+            qwerty: ['QWERTYUIOP[]', 'ASDFGHJKL;\'', 'ZXCVBNM,./'],
+            dvorak: ['\',.PYFGCRL/=', 'AOEUIDHTNS-', ';QJKXBMWVZ'],
+        };
+
+        function render(keyboard, layout) {
+            for (i in layout) {
+                var row = $('<div class="row-' + i + '">');
+                for (var j = 0; j < layout[i].length; j++) {
+                    $('<span class="key">')
+                        .text(layout[i][j])
+                        .toggleClass('home', i == 1 && (0 <= j && j <= 3 || 6 <= j && j <= 9))
+                        .toggleClass('bump', i == 1 && (j === 3 || j === 6))
+                        .appendTo(row);
+                }
+                row.appendTo(keyboard);
+            }
+        }
+
+        return {
+            renderLayout: function(keyboard, layoutName) {
+                keyboard.empty();
+                if (layouts[layoutName] !== undefined) {
+                    render(keyboard, layouts[layoutName]);
+                }
+            },
+        };
+    })();
+
+    keyboardLayout.renderLayout($('#qwerty-layout'), 'qwerty');
+    keyboardLayout.renderLayout($('#dvorak-layout'), 'dvorak');
+
     $(document).on('keydown', function(e) {
         // Ignore keyboard shortcuts
         if (e.altKey || e.ctrlKey || e.metaKey) {

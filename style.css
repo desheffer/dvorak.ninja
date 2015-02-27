@@ -56,7 +56,8 @@ body {
 }
 #stats {
     background-color: #eee;
-    padding: 1em;
+    padding-bottom: 1em;
+    padding-top: 1em;
 }
 #stats .stat {
     font-size: 10pt;

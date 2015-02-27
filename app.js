@@ -287,11 +287,19 @@
         }
     });
 
-    $('#paragraphs a').on('click', function() {
-        controller.start($(this).data('paragraph'), 3);
-        $(this).blur();
-        return false;
-    });
+    for (i in window.paragraphs) {
+        var li = $('<li>');
+        var a = $('<a href="#">')
+            .text(window.paragraphs[i].name)
+            .data('paragraph', window.paragraphs[i].text)
+            .on('click', function() {
+                controller.start($(this).data('paragraph'), 3);
+                $(this).blur();
+                return false;
+            })
+            .appendTo(li);
+        li.appendTo($('#paragraphs'));
+    }
 
     $('#map-dvorak').on('change', function() {
         var layoutMapper = $(this).is(':checked') ? dvorakLayoutMapper : null;

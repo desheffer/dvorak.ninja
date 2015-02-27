@@ -5,9 +5,26 @@ body {
     font-family: Consolas, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
     margin: 5em auto;
 }
+meter,
+meter::-webkit-meter-bar {
+    background: #d3d7cf;
+    border-radius: 3px;
+}
+meter::-webkit-meter-optimum-value {
+    background: #73d216;
+    border-radius: 3px;
+}
+meter::-webkit-meter-suboptimum-value {
+    background: #edd400;
+    border-radius: 3px;
+}
+meter::-webkit-meter-even-less-good-value {
+    background: #cc0000;
+    border-radius: 3px;
+}
 #type {
     background-color: white;
-    border: 1px solid #999;
+    border: 1px solid #888a85;
     font-family: Consolas, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
     font-size: 14pt;
     min-height: 10em;
@@ -39,14 +56,14 @@ body {
     color: black;
 }
 #type .incorrect {
-    background-color: red;
+    background-color: #ef2929;
     color: black;
 }
 #type .remaining {
-    color: #999;
+    color: #babdb6;
 }
 #type.completed {
-    background-color: #cf9;
+    background-color: #8ae234;
 }
 #type.completed .cursor,
 #type.completed .incorrect,
@@ -83,7 +100,7 @@ body {
     margin-left: 6em;
 }
 .layout .keyboard {
-    color: #999;
+    color: #888a85;
     margin: 1em auto;
 }
 .layout .keyboard .row-1 {

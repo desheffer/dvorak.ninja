@@ -272,7 +272,9 @@
                 .data('paragraph', paragraphs[i].text)
                 .on('click', function() {
                     controller.start($(this).data('paragraph'), 3);
-                    $(this).blur();
+
+                    container.find('li a.active').removeClass('active');
+                    $(this).addClass('active').blur();
                     return false;
                 })
                 .appendTo(li);

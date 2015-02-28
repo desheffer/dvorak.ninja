@@ -14,10 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-(function() {
-    function time() {
-        return new Date().getTime() / 1000;
-    }
+(function($) {
+    var clock = (function() {
+        return {
+            time: function() {
+                return new Date().getTime() / 1000;
+            },
+        };
+    })();
 
     var typeBox = (function() {
         var type = $('#type');
@@ -84,7 +88,7 @@
         };
     })();
 
-    var controller = (function(typeBox) {
+    var controller = (function(clock, typeBox) {
         var wordsToType = null;
         var correctlyTyped = null;
         var incorrectlyTyped = null;
@@ -97,7 +101,7 @@
         tick();
 
         function tick() {
-            var now = time();
+            var now = clock.time();
 
             isActive = (startTime !== null && now > startTime && notYetTyped !== null && notYetTyped !== '');
 
@@ -128,7 +132,7 @@
 
                 wordsToType = notYetTyped = words;
                 correctlyTyped = incorrectlyTyped = '';
-                startTime = time() + timeout;
+                startTime = clock.time() + timeout;
 
                 tick();
             },
@@ -163,7 +167,7 @@
                 tick();
             },
         };
-    })(typeBox);
+    })(clock, typeBox);
 
     var keyboardMapper = (function() {
         var maps = {
@@ -200,13 +204,13 @@
         };
     })();
 
-    var keyboardLayout = (function() {
+    var keyboardLayouts = (function(qwertyContainer, dvorakContainer) {
         var layouts = {
             qwerty: ['QWERTYUIOP[]', 'ASDFGHJKL;\'', 'ZXCVBNM,./'],
             dvorak: ['\',.PYFGCRL/=', 'AOEUIDHTNS-', ';QJKXBMWVZ'],
         };
 
-        function render(container, layout) {
+        function renderLayout(container, layout) {
             for (i in layout) {
                 var row = $('<div class="row-' + i + '">');
                 for (var j = 0; j < layout[i].length; j++) {
@@ -220,49 +224,47 @@
             }
         }
 
-        return {
-            renderLayout: function(container, layoutName) {
-                container.empty();
-                if (layouts[layoutName] !== undefined) {
-                    render(container, layouts[layoutName]);
-                }
-            },
-        };
-    })();
+        renderLayout(qwertyContainer, layouts.qwerty);
+        renderLayout(dvorakContainer, layouts.dvorak);
 
-    keyboardLayout.renderLayout($('#qwerty-layout'), 'qwerty');
-    keyboardLayout.renderLayout($('#dvorak-layout'), 'dvorak');
+        return {};
+    })($('#qwerty-layout'), $('#dvorak-layout'));
 
-    $('#map-dvorak').on('change', function() {
-        var mapName = $(this).is(':checked') ? 'qwertyToDvorak' : null;
-        keyboardMapper.setMap(mapName);
-        $(this).blur();
-        return false;
-    });
+    var input = (function($, controller, keyboardMapper) {
+        $(document).on('keydown', function(e) {
+            // Ignore keyboard shortcuts
+            if (e.altKey || e.ctrlKey || e.metaKey) {
+                return true;
+            }
 
-    $(document).on('keydown', function(e) {
-        // Ignore keyboard shortcuts
-        if (e.altKey || e.ctrlKey || e.metaKey) {
-            return true;
-        }
+            // Backspace
+            if (e.keyCode === 8) {
+                controller.backspaceTyped();
+                return false;
+            }
+        });
 
-        // Backspace
-        if (e.keyCode === 8) {
-            controller.backspaceTyped();
+        $(document).on('keypress', function(e) {
+            // Normal keys
+            var letter = keyboardMapper.fromCharCode(e.charCode);
+            if (letter) {
+                controller.letterTyped(letter);
+                return false;
+            }
+        });
+
+        $('#map-dvorak').on('change', function() {
+            var mapName = $(this).is(':checked') ? 'qwertyToDvorak' : null;
+            keyboardMapper.setMap(mapName);
+
+            $(this).blur();
             return false;
-        }
-    });
+        });
 
-    $(document).on('keypress', function(e) {
-        // Normal keys
-        var letter = keyboardMapper.fromCharCode(e.charCode);
-        if (letter) {
-            controller.letterTyped(letter);
-            return false;
-        }
-    });
+        return {};
+    })($, controller, keyboardMapper);
 
-    (function(container, paragraphs) {
+    var paragraphSelector = (function(container, paragraphs) {
         for (i in paragraphs) {
             var li = $('<li>');
             var a = $('<a href="#">')
@@ -276,5 +278,7 @@
                 .appendTo(li);
             li.appendTo(container);
         }
+
+        return {};
     })($('#paragraphs'), window.paragraphs);
-})();
+})($);

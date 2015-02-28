@@ -105,7 +105,11 @@
 
         return {
             renderInitial: function () {
-                type.removeClass('completed');
+                if (type.data('mode') !== 'initial') {
+                    type.data('mode', 'initial');
+                    type.html('<div class="overlay">Select a paragraph from above</div>');
+                    type.removeClass('completed');
+                }
 
                 renderStats('--', '--', '--', '--');
             },
@@ -113,11 +117,10 @@
                 if (type.data('mode') !== 'countdown') {
                     type.data('mode', 'countdown');
                     type.html('<div class="overlay"></div>');
+                    type.removeClass('completed');
                 }
 
                 type.find('.overlay').text(Math.ceil(seconds));
-
-                type.removeClass('completed');
 
                 renderStats(0, 0, 0, 0);
             },
@@ -240,7 +243,7 @@
             dvorak: ['\',.PYFGCRL/=', 'AOEUIDHTNS-', ';QJKXBMWVZ'],
         };
 
-        function render(keyboard, layout) {
+        function render(container, layout) {
             for (i in layout) {
                 var row = $('<div class="row-' + i + '">');
                 for (var j = 0; j < layout[i].length; j++) {
@@ -250,15 +253,15 @@
                         .toggleClass('bump', i == 1 && (j === 3 || j === 6))
                         .appendTo(row);
                 }
-                row.appendTo(keyboard);
+                row.appendTo(container);
             }
         }
 
         return {
-            renderLayout: function(keyboard, layoutName) {
-                keyboard.empty();
+            renderLayout: function(container, layoutName) {
+                container.empty();
                 if (layouts[layoutName] !== undefined) {
-                    render(keyboard, layouts[layoutName]);
+                    render(container, layouts[layoutName]);
                 }
             },
         };
@@ -266,6 +269,13 @@
 
     keyboardLayout.renderLayout($('#qwerty-layout'), 'qwerty');
     keyboardLayout.renderLayout($('#dvorak-layout'), 'dvorak');
+
+    $('#map-dvorak').on('change', function() {
+        var layoutMapper = $(this).is(':checked') ? dvorakLayoutMapper : null;
+        keyboardMapper.setLayoutMapper(layoutMapper);
+        $(this).blur();
+        return false;
+    });
 
     $(document).on('keydown', function(e) {
         // Ignore keyboard shortcuts
@@ -287,24 +297,19 @@
         }
     });
 
-    for (i in window.paragraphs) {
-        var li = $('<li>');
-        var a = $('<a href="#">')
-            .text(window.paragraphs[i].name)
-            .data('paragraph', window.paragraphs[i].text)
-            .on('click', function() {
-                controller.start($(this).data('paragraph'), 3);
-                $(this).blur();
-                return false;
-            })
-            .appendTo(li);
-        li.appendTo($('#paragraphs'));
-    }
-
-    $('#map-dvorak').on('change', function() {
-        var layoutMapper = $(this).is(':checked') ? dvorakLayoutMapper : null;
-        keyboardMapper.setLayoutMapper(layoutMapper);
-        $(this).blur();
-        return false;
-    });
+    (function(container, paragraphs) {
+        for (i in paragraphs) {
+            var li = $('<li>');
+            var a = $('<a href="#">')
+                .text(paragraphs[i].name)
+                .data('paragraph', paragraphs[i].text)
+                .on('click', function() {
+                    controller.start($(this).data('paragraph'), 3);
+                    $(this).blur();
+                    return false;
+                })
+                .appendTo(li);
+            li.appendTo(container);
+        }
+    })($('#paragraphs'), window.paragraphs);
 })();

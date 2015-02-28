@@ -1,11 +1,3 @@
-a {
-    text-decoration: underline;
-}
-a.active {
-    background-color: #eee;
-    color: black;
-    text-decoration: none;
-}
 body {
     font-family: Consolas, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
     margin: 5em auto;
@@ -32,13 +24,13 @@ meter::-webkit-meter-even-less-good-value {
     border: 1px solid #777;
     font-family: Consolas, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
     font-size: 14pt;
-    min-height: 10em;
+    min-height: 15em;
     padding: 10px;
     white-space: pre-wrap;
 }
 #type .overlay {
     font-size: 32pt;
-    margin-top: 1em;
+    margin-top: 2em;
     text-align: center;
 }
 #type .cursor {
@@ -63,20 +55,19 @@ meter::-webkit-meter-even-less-good-value {
     color: #777;
 }
 #type.completed {
-    background-color: #5cb85c;
+    background-color: #dff0d8;
 }
 #type.completed .cursor,
 #type.completed .incorrect,
-#type.completed .remaining
-{
+#type.completed .remaining {
     display: none;
 }
-#type.completed .correct
-{
-    color: white;
+#type.completed .correct {
+    color: #777;
 }
 #stats {
     background-color: #eee;
+    border-radius: 0 0 10px 10px;
     padding-bottom: 1em;
     padding-top: 1em;
 }
@@ -95,6 +86,16 @@ meter::-webkit-meter-even-less-good-value {
 }
 #paragraphs {
     margin-top: 1em;
+}
+#paragraphs a {
+    border-radius: 10px;
+    padding: 0 0.5em;
+    text-decoration: underline;
+}
+#paragraphs a.active {
+    background-color: #eee;
+    color: black;
+    text-decoration: none;
 }
 .layout {
     margin-top: 5em;

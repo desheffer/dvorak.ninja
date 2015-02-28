@@ -15,18 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 (function($) {
-    var clock = (function() {
-        return {
-            time: function() {
-                return new Date().getTime() / 1000;
-            },
+    var Clock = function() {
+        this.time = function() {
+            return new Date().getTime() / 1000;
         };
-    })();
+    };
 
-    var typeBox = (function() {
-        var type = $('#type');
-        var stats = $('#stats');
-
+    var TypeBox = function(type, stats) {
         function renderStats(wpm, characters, words, seconds) {
             stats.find('.wpm .value').text(wpm);
             stats.find('.wpm-meter meter').val(isFinite(wpm) ? wpm : 0);
@@ -35,60 +30,102 @@
             stats.find('.seconds .value').text(seconds);
         }
 
-        return {
-            renderInitial: function () {
-                if (type.data('mode') !== 'initial') {
-                    type.data('mode', 'initial');
-                    type.html('<div class="overlay">Select a paragraph from above</div>');
-                    type.removeClass('completed');
-                }
+        this.renderInitial = function () {
+            if (type.data('mode') !== 'initial') {
+                type.data('mode', 'initial');
+                type.html('<div class="overlay">Select a paragraph from above</div>');
+                type.removeClass('completed');
+            }
 
-                renderStats('--', '--', '--', '--');
-            },
-            renderCountdown: function (seconds) {
-                if (type.data('mode') !== 'countdown') {
-                    type.data('mode', 'countdown');
-                    type.html('<div class="overlay"></div>');
-                    type.removeClass('completed');
-                }
-
-                type.find('.overlay').text(Math.ceil(seconds));
-
-                renderStats(0, 0, 0, 0);
-            },
-            renderProgress: function(isCompleted, correctlyTyped, incorrectlyTyped, notYetTyped, seconds) {
-                if (type.data('mode') !== 'progress') {
-                    type.data('mode', 'progress');
-                    type.html(
-                        '<span class="correct"></span>'
-                        + '<span class="incorrect"></span>'
-                        + '<span class="cursor"></span>'
-                        + '<span class="remaining"></span>'
-                    );
-                }
-
-                type.toggleClass('completed', isCompleted);
-
-                var remaining = notYetTyped.substr(incorrectlyTyped.length)
-                type.find('.correct').text(correctlyTyped);
-                type.find('.incorrect').text(incorrectlyTyped);
-                type.find('.remaining').text(remaining);
-
-                var characters = correctlyTyped.length;
-                var words = correctlyTyped.length / 5;
-                var wpm = words / (seconds / 60);
-
-                renderStats(
-                    Math.round(wpm ? wpm : 0),
-                    characters,
-                    Math.floor(words),
-                    Math.floor(seconds)
-                );
-            },
+            renderStats('--', '--', '--', '--');
         };
-    })();
 
-    var controller = (function(clock, typeBox) {
+        this.renderCountdown = function (seconds) {
+            if (type.data('mode') !== 'countdown') {
+                type.data('mode', 'countdown');
+                type.html('<div class="overlay"></div>');
+                type.removeClass('completed');
+            }
+
+            type.find('.overlay').text(Math.ceil(seconds));
+
+            renderStats(0, 0, 0, 0);
+        };
+
+        this.renderProgress = function(isCompleted, correctlyTyped, incorrectlyTyped, notYetTyped, seconds) {
+            if (type.data('mode') !== 'progress') {
+                type.data('mode', 'progress');
+                type.html(
+                    '<span class="correct"></span>'
+                    + '<span class="incorrect"></span>'
+                    + '<span class="cursor"></span>'
+                    + '<span class="remaining"></span>'
+                );
+            }
+
+            type.toggleClass('completed', isCompleted);
+
+            var remaining = notYetTyped.substr(incorrectlyTyped.length)
+            type.find('.correct').text(correctlyTyped);
+            type.find('.incorrect').text(incorrectlyTyped);
+            type.find('.remaining').text(remaining);
+
+            var characters = correctlyTyped.length;
+            var words = correctlyTyped.length / 5;
+            var wpm = words / (seconds / 60);
+
+            renderStats(
+                Math.round(wpm ? wpm : 0),
+                characters,
+                Math.floor(words),
+                Math.floor(seconds)
+            );
+        };
+    };
+
+    var KeyboardLayoutsDisplay = function(qwertyContainer, dvorakContainer) {
+        var layouts = {
+            qwerty: ['QWERTYUIOP[]', 'ASDFGHJKL;\'', 'ZXCVBNM,./'],
+            dvorak: ['\',.PYFGCRL/=', 'AOEUIDHTNS-', ';QJKXBMWVZ'],
+        };
+
+        function renderLayout(container, layout) {
+            for (i in layout) {
+                var row = $('<div class="row-' + i + '">');
+                for (var j = 0; j < layout[i].length; j++) {
+                    $('<span class="key">')
+                        .text(layout[i][j])
+                        .toggleClass('home', i == 1 && (0 <= j && j <= 3 || 6 <= j && j <= 9))
+                        .toggleClass('bump', i == 1 && (j === 3 || j === 6))
+                        .appendTo(row);
+                }
+                row.appendTo(container);
+            }
+        }
+
+        renderLayout(qwertyContainer, layouts.qwerty);
+        renderLayout(dvorakContainer, layouts.dvorak);
+    };
+
+    var ParagraphSelector = function(paragraphs, container) {
+        for (i in paragraphs) {
+            var li = $('<li>');
+            $('<a href="#">')
+                .text(paragraphs[i].name)
+                .data('paragraph', paragraphs[i].text)
+                .on('click', function() {
+                    controller.start($(this).data('paragraph'), 3);
+
+                    container.find('li a.active').removeClass('active');
+                    $(this).addClass('active').blur();
+                    return false;
+                })
+                .appendTo(li);
+            li.appendTo(container);
+        }
+    };
+
+    var Controller = function(clock, typeBox) {
         var wordsToType = null;
         var correctlyTyped = null;
         var incorrectlyTyped = null;
@@ -97,8 +134,6 @@
 
         var isActive = false;
         var timer = null;
-
-        tick();
 
         function tick() {
             var now = clock.time();
@@ -124,52 +159,54 @@
             }
         }
 
-        return {
-            start: function(words, timeout) {
-                if (timeout === undefined) {
-                    timeout = 0;
-                }
+        this.start = function(words, timeout) {
+            if (timeout === undefined) {
+                timeout = 0;
+            }
 
-                wordsToType = notYetTyped = words;
-                correctlyTyped = incorrectlyTyped = '';
-                startTime = clock.time() + timeout;
+            wordsToType = notYetTyped = words;
+            correctlyTyped = incorrectlyTyped = '';
+            startTime = clock.time() + timeout;
 
-                tick();
-            },
-            letterTyped: function(letter) {
-                if (!isActive) {
-                    return;
-                }
-
-                var expected = notYetTyped.substr(0, 1);
-
-                if (incorrectlyTyped.length === 0 && letter === expected) {
-                    correctlyTyped = correctlyTyped + letter;
-                    notYetTyped = notYetTyped.substr(1);
-                } else if (incorrectlyTyped.length <= 10) {
-                    incorrectlyTyped = incorrectlyTyped + letter;
-                }
-
-                tick();
-            },
-            backspaceTyped: function() {
-                if (!isActive) {
-                    return;
-                }
-
-                if (incorrectlyTyped.length > 0) {
-                    incorrectlyTyped = incorrectlyTyped.substr(0, incorrectlyTyped.length - 1);
-                } else if (correctlyTyped.length > 0) {
-                    notYetTyped = correctlyTyped[correctlyTyped.length - 1] + notYetTyped;
-                    correctlyTyped = correctlyTyped.substr(0, correctlyTyped.length - 1);
-                }
-
-                tick();
-            },
+            tick();
         };
-    })(clock, typeBox);
 
-    var keyboardMapper = (function() {
+        this.letterTyped = function(letter) {
+            if (!isActive) {
+                return;
+            }
+
+            var expected = notYetTyped.substr(0, 1);
+
+            if (incorrectlyTyped.length === 0 && letter === expected) {
+                correctlyTyped = correctlyTyped + letter;
+                notYetTyped = notYetTyped.substr(1);
+            } else if (incorrectlyTyped.length <= 10) {
+                incorrectlyTyped = incorrectlyTyped + letter;
+            }
+
+            tick();
+        };
+
+        this.backspaceTyped = function() {
+            if (!isActive) {
+                return;
+            }
+
+            if (incorrectlyTyped.length > 0) {
+                incorrectlyTyped = incorrectlyTyped.substr(0, incorrectlyTyped.length - 1);
+            } else if (correctlyTyped.length > 0) {
+                notYetTyped = correctlyTyped[correctlyTyped.length - 1] + notYetTyped;
+                correctlyTyped = correctlyTyped.substr(0, correctlyTyped.length - 1);
+            }
+
+            tick();
+        };
+
+        tick();
+    };
+
+    var KeyboardMapper = function() {
         var maps = {
             null: {},
             qwertyToDvorak: {
@@ -189,49 +226,22 @@
         };
         var mapName = null;
 
-        return {
-            fromCharCode: function(charCode) {
-                var char = String.fromCharCode(charCode);
-                return maps[mapName][char] !== undefined ? maps[mapName][char] : char;
-            },
-            setMap: function(aMapName) {
-                if (maps[mapName] !== undefined) {
-                    mapName = aMapName;
-                } else {
-                    mapName = null;
-                }
-            },
-        };
-    })();
-
-    var keyboardLayouts = (function(qwertyContainer, dvorakContainer) {
-        var layouts = {
-            qwerty: ['QWERTYUIOP[]', 'ASDFGHJKL;\'', 'ZXCVBNM,./'],
-            dvorak: ['\',.PYFGCRL/=', 'AOEUIDHTNS-', ';QJKXBMWVZ'],
+        this.fromCharCode = function(charCode) {
+            var char = String.fromCharCode(charCode);
+            return maps[mapName][char] !== undefined ? maps[mapName][char] : char;
         };
 
-        function renderLayout(container, layout) {
-            for (i in layout) {
-                var row = $('<div class="row-' + i + '">');
-                for (var j = 0; j < layout[i].length; j++) {
-                    $('<span class="key">')
-                        .text(layout[i][j])
-                        .toggleClass('home', i == 1 && (0 <= j && j <= 3 || 6 <= j && j <= 9))
-                        .toggleClass('bump', i == 1 && (j === 3 || j === 6))
-                        .appendTo(row);
-                }
-                row.appendTo(container);
+        this.changeMap = function(newMapName) {
+            if (maps[mapName] !== undefined) {
+                mapName = newMapName;
+            } else {
+                mapName = null;
             }
-        }
+        };
+    };
 
-        renderLayout(qwertyContainer, layouts.qwerty);
-        renderLayout(dvorakContainer, layouts.dvorak);
-
-        return {};
-    })($('#qwerty-layout'), $('#dvorak-layout'));
-
-    var input = (function($, controller, keyboardMapper) {
-        $(document).on('keydown', function(e) {
+    var Input = function(document, controller, mapQwertyToDvorakCheckbox, keyboardMapper) {
+        document.on('keydown', function(e) {
             // Ignore keyboard shortcuts
             if (e.altKey || e.ctrlKey || e.metaKey) {
                 return true;
@@ -244,7 +254,7 @@
             }
         });
 
-        $(document).on('keypress', function(e) {
+        document.on('keypress', function(e) {
             // Normal keys
             var letter = keyboardMapper.fromCharCode(e.charCode);
             if (letter) {
@@ -253,34 +263,21 @@
             }
         });
 
-        $('#map-dvorak').on('change', function() {
+        $(mapQwertyToDvorakCheckbox).on('change', function() {
             var mapName = $(this).is(':checked') ? 'qwertyToDvorak' : null;
-            keyboardMapper.setMap(mapName);
+            keyboardMapper.changeMap(mapName);
 
             $(this).blur();
             return false;
         });
+    };
 
-        return {};
-    })($, controller, keyboardMapper);
+    var typeBox = new TypeBox($('#type'), $('#stats'));
+    var keyboardLayoutsDisplay = new KeyboardLayoutsDisplay($('#qwerty-layout'), $('#dvorak-layout'));
+    var paragraphSelector = new ParagraphSelector(window.paragraphs, $('#paragraphs'));
 
-    var paragraphSelector = (function(container, paragraphs) {
-        for (i in paragraphs) {
-            var li = $('<li>');
-            var a = $('<a href="#">')
-                .text(paragraphs[i].name)
-                .data('paragraph', paragraphs[i].text)
-                .on('click', function() {
-                    controller.start($(this).data('paragraph'), 3);
-
-                    container.find('li a.active').removeClass('active');
-                    $(this).addClass('active').blur();
-                    return false;
-                })
-                .appendTo(li);
-            li.appendTo(container);
-        }
-
-        return {};
-    })($('#paragraphs'), window.paragraphs);
+    var clock = new Clock();
+    var controller = new Controller(clock, typeBox);
+    var keyboardMapper = new KeyboardMapper();
+    var input = new Input($(document), controller, $('#map-qwerty-to-dvorak'), keyboardMapper);
 })($);

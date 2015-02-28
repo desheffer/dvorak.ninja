@@ -83,25 +83,55 @@
         };
     };
 
-    var KeyboardLayoutsDisplay = function(qwertyContainer, dvorakContainer) {
+    var KeyboardLayoutsRenderer = function(qwertyContainer, dvorakContainer) {
         var layouts = {
-            qwerty: ['QWERTYUIOP[]', 'ASDFGHJKL;\'', 'ZXCVBNM,./'],
-            dvorak: ['\',.PYFGCRL/=', 'AOEUIDHTNS-', ';QJKXBMWVZ'],
+            qwerty: [
+                ['Qq', 'Ww', 'Ee', 'Rr', 'Tt', 'Yy', 'Uu', 'Ii', 'Oo', 'Pp', '[{', ']}'],
+                ['Aa', 'Ss', 'Dd', 'Ff', 'Gg', 'Hh', 'Jj', 'Kk', 'Ll', ';:', '\'"'],
+                ['Zz', 'Xx', 'Cc', 'Vv', 'Bb', 'Nn', 'Mm', ',<', '.>', '/?'],
+            ],
+            dvorak: [
+                ['\'"', ',<', '.>', 'Pp', 'Yy', 'Ff', 'Gg', 'Cc', 'Rr', 'Ll', '/?', '=+'],
+                ['Aa', 'Oo', 'Ee', 'Uu', 'Ii', 'Dd', 'Hh', 'Tt', 'Nn', 'Ss', '-_'],
+                [';:', 'Qq', 'Jj', 'Kk', 'Xx', 'Bb', 'Mm', 'Ww', 'Vv', 'Zz'],
+            ],
         };
+        var nextKey = null;
 
         function renderLayout(container, layout) {
             for (i in layout) {
                 var row = $('<div class="row-' + i + '">');
                 for (var j = 0; j < layout[i].length; j++) {
-                    $('<span class="key">')
-                        .text(layout[i][j])
+                    var key = $('<span class="key">')
+                        .text(layout[i][j][0])
                         .toggleClass('home', i == 1 && (0 <= j && j <= 3 || 6 <= j && j <= 9))
                         .toggleClass('bump', i == 1 && (j === 3 || j === 6))
                         .appendTo(row);
+
+                    for (var k in layout[i][j]) {
+                        key.addClass('key-' + layout[i][j][k].charCodeAt());
+                    }
                 }
                 row.appendTo(container);
             }
         }
+
+        this.clearNextKey = function() {
+            qwertyContainer.find('.key.next').removeClass('next');
+            dvorakContainer.find('.key.next').removeClass('next');
+            nextKey = null;
+        };
+
+        this.renderNextKey = function(key) {
+            if (nextKey === key) {
+                return;
+            }
+
+            this.clearNextKey();
+            qwertyContainer.find('.key.key-' + key.charCodeAt()).addClass('next');
+            dvorakContainer.find('.key.key-' + key.charCodeAt()).addClass('next');
+            nextKey = key;
+        };
 
         renderLayout(qwertyContainer, layouts.qwerty);
         renderLayout(dvorakContainer, layouts.dvorak);
@@ -125,7 +155,7 @@
         }
     };
 
-    var Controller = function(clock, typeBox) {
+    var Controller = function(clock, typeBox, keyboardLayoutRenderer) {
         var wordsToType = null;
         var correctlyTyped = null;
         var incorrectlyTyped = null;
@@ -149,6 +179,12 @@
                 typeBox.renderProgress(isCompleted, correctlyTyped, incorrectlyTyped, notYetTyped, now - startTime);
             } else {
                 typeBox.renderInitial();
+            }
+
+            if (isActive && incorrectlyTyped.length === 0) {
+                keyboardLayoutRenderer.renderNextKey(notYetTyped[0]);
+            } else {
+                keyboardLayoutRenderer.clearNextKey();
             }
 
             clearInterval(timer);
@@ -273,11 +309,11 @@
     };
 
     var typeBox = new TypeBox($('#type'), $('#stats'));
-    var keyboardLayoutsDisplay = new KeyboardLayoutsDisplay($('#qwerty-layout'), $('#dvorak-layout'));
+    var keyboardLayoutsRenderer = new KeyboardLayoutsRenderer($('#qwerty-layout'), $('#dvorak-layout'));
     var paragraphSelector = new ParagraphSelector(window.paragraphs, $('#paragraphs'));
 
     var clock = new Clock();
-    var controller = new Controller(clock, typeBox);
+    var controller = new Controller(clock, typeBox, keyboardLayoutsRenderer);
     var keyboardMapper = new KeyboardMapper();
     var input = new Input($(document), controller, $('#map-qwerty-to-dvorak'), keyboardMapper);
 })($);

@@ -12,24 +12,24 @@ body {
 }
 meter,
 meter::-webkit-meter-bar {
-    background: #d3d7cf;
+    background: #ddd;
     border-radius: 3px;
 }
 meter::-webkit-meter-optimum-value {
-    background: #73d216;
+    background: #5cb85c;
     border-radius: 3px;
 }
 meter::-webkit-meter-suboptimum-value {
-    background: #edd400;
+    background: #f0ad4e;
     border-radius: 3px;
 }
 meter::-webkit-meter-even-less-good-value {
-    background: #cc0000;
+    background: #d9534f;
     border-radius: 3px;
 }
 #type {
     background-color: white;
-    border: 1px solid #888a85;
+    border: 1px solid #777;
     font-family: Consolas, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
     font-size: 14pt;
     min-height: 10em;
@@ -43,6 +43,7 @@ meter::-webkit-meter-even-less-good-value {
 }
 #type .cursor {
     animation: blink 1s steps(2, start) infinite;
+    -moz-animation: blink 1s steps(2, start) infinite;
     -webkit-animation: blink 1s steps(2, start) infinite;
     background-color: black;
     display: inline-block;
@@ -51,30 +52,28 @@ meter::-webkit-meter-even-less-good-value {
     position: absolute;
     width: 2px;
 }
-@keyframes blink {
-    to { visibility: hidden; }
-}
-@-webkit-keyframes blink {
-    to { visibility: hidden; }
-}
 #type .correct {
-    color: black;
+    color: #ccc;
 }
 #type .incorrect {
-    background-color: #ef2929;
+    background-color: #d9534f;
     color: black;
 }
 #type .remaining {
-    color: #babdb6;
+    color: #777;
 }
 #type.completed {
-    background-color: #8ae234;
+    background-color: #5cb85c;
 }
 #type.completed .cursor,
 #type.completed .incorrect,
 #type.completed .remaining
 {
     display: none;
+}
+#type.completed .correct
+{
+    color: white;
 }
 #stats {
     background-color: #eee;
@@ -105,7 +104,7 @@ meter::-webkit-meter-even-less-good-value {
     margin-left: 6em;
 }
 .layout .keyboard {
-    color: #888a85;
+    color: #777;
     margin: 1em auto;
 }
 .layout .keyboard .row-1 {
@@ -115,14 +114,35 @@ meter::-webkit-meter-even-less-good-value {
     padding-left: 1.6em;
 }
 .layout .keyboard .key {
+    border-radius: 10px;
     margin: 0 0.25em;
     padding: 0 0.5em;
 }
-.layout .keyboard .home {
+.layout .keyboard .key.home {
     background-color: #eee;
-    border-radius: 10px;
     color: black;
 }
-.layout .keyboard .bump {
+.layout .keyboard .key.bump {
     text-decoration: underline;
+}
+.layout .keyboard .key.next {
+    background-color: #337ab7;
+    color: white;
+    -webkit-transition-delay: 1s;
+    transition-delay: 1s;
+}
+@keyframes blink {
+    to {
+        visibility: hidden;
+    }
+}
+@-moz-keyframes blink {
+    to {
+        visibility: hidden;
+    }
+}
+@-webkit-keyframes blink {
+    to {
+        visibility: hidden;
+    }
 }

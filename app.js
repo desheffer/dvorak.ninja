@@ -19,78 +19,6 @@
         return new Date().getTime() / 1000;
     }
 
-    var keyboardMapper = (function() {
-        var layoutMapper = null;
-
-        var normalLayer = {
-            32: ' ',
-            48: '0', 49: '1', 50: '2', 51: '3', 52: '4',
-            53: '5', 54: '6', 55: '7', 56: '8', 57: '9',
-            65: 'a', 66: 'b', 67: 'c', 68: 'd', 69: 'e',
-            70: 'f', 71: 'g', 72: 'h', 73: 'i', 74: 'j',
-            75: 'k', 76: 'l', 77: 'm', 78: 'n', 79: 'o',
-            80: 'p', 81: 'q', 82: 'r', 83: 's', 84: 't',
-            85: 'u', 86: 'v', 87: 'w', 88: 'x', 89: 'y',
-            90: 'z',
-            186: ';', 187: '=', 188: ',', 189: '-', 190: '.',
-            191: '/', 192: '`', 219: '[', 220: '\\', 221: ']',
-            222: '\'',
-        };
-
-        var shiftLayer = {
-            32: ' ',
-            48: ')', 49: '!', 50: '@', 51: '#', 52: '$',
-            53: '%', 54: '^', 55: '&', 56: '*', 57: '(',
-            65: 'A', 66: 'B', 67: 'C', 68: 'D', 69: 'E',
-            70: 'F', 71: 'G', 72: 'H', 73: 'I', 74: 'J',
-            75: 'K', 76: 'L', 77: 'M', 78: 'N', 79: 'O',
-            80: 'P', 81: 'Q', 82: 'R', 83: 'S', 84: 'T',
-            85: 'U', 86: 'V', 87: 'W', 88: 'X', 89: 'Y',
-            90: 'Z',
-            186: ':', 187: '+', 188: '<', 189: '_', 190: '>',
-            191: '?', 192: '~', 219: '{', 220: '|', 221: '}',
-            222: '"',
-        };
-
-        return {
-            fromCharCode: function(keyCode, shiftKey) {
-                var char = shiftKey ? shiftLayer[keyCode] : normalLayer[keyCode];
-
-                if (layoutMapper !== null) {
-                    return layoutMapper.map(char);
-                } else {
-                    return char;
-                }
-            },
-            setLayoutMapper: function(aLayoutMapper) {
-                layoutMapper = aLayoutMapper;
-            },
-        };
-    })();
-
-    var dvorakLayoutMapper = (function() {
-        var map = {
-            'a': 'a', 'A': 'A', 'b': 'x', 'B': 'X', 'c': 'j', 'C': 'J',
-            'd': 'e', 'D': 'E', 'e': '.', 'E': '>', 'f': 'u', 'F': 'U',
-            'g': 'i', 'G': 'I', 'h': 'd', 'H': 'D', 'i': 'c', 'I': 'C',
-            'j': 'h', 'J': 'H', 'k': 't', 'K': 'T', 'l': 'n', 'L': 'N',
-            'm': 'm', 'M': 'M', 'n': 'b', 'N': 'B', 'o': 'r', 'O': 'R',
-            'p': 'l', 'P': 'L', 'q': '\'', 'Q': '"', 'r': 'p', 'R': 'P',
-            's': 'o', 'S': 'O', 't': 'y', 'T': 'Y', 'u': 'g', 'U': 'G',
-            'v': 'k', 'V': 'K', 'w': ',', 'W': '<', 'x': 'q', 'X': 'Q',
-            'y': 'f', 'Y': 'F', 'z': ';', 'Z': ';', '-': '[', '_': '{',
-            '=': ']', '+': '}', '[': '/', '{': '?', ']': '=', '}': '+',
-            ';': 's', ':': 'S', '\'': '-', '"': '_', ',': 'w', '<': 'W',
-            '.': 'v', '>': 'V', '/': 'z', '?': 'Z',
-        };
-
-        return {
-            map: function(char) {
-                return map[char] !== undefined ? map[char] : char;
-            },
-        };
-    })();
-
     var typeBox = (function() {
         var type = $('#type');
         var stats = $('#stats');
@@ -237,6 +165,41 @@
         };
     })(typeBox);
 
+    var keyboardMapper = (function() {
+        var maps = {
+            null: {},
+            qwertyToDvorak: {
+                'a': 'a', 'A': 'A', 'b': 'x', 'B': 'X', 'c': 'j', 'C': 'J',
+                'd': 'e', 'D': 'E', 'e': '.', 'E': '>', 'f': 'u', 'F': 'U',
+                'g': 'i', 'G': 'I', 'h': 'd', 'H': 'D', 'i': 'c', 'I': 'C',
+                'j': 'h', 'J': 'H', 'k': 't', 'K': 'T', 'l': 'n', 'L': 'N',
+                'm': 'm', 'M': 'M', 'n': 'b', 'N': 'B', 'o': 'r', 'O': 'R',
+                'p': 'l', 'P': 'L', 'q': '\'', 'Q': '"', 'r': 'p', 'R': 'P',
+                's': 'o', 'S': 'O', 't': 'y', 'T': 'Y', 'u': 'g', 'U': 'G',
+                'v': 'k', 'V': 'K', 'w': ',', 'W': '<', 'x': 'q', 'X': 'Q',
+                'y': 'f', 'Y': 'F', 'z': ';', 'Z': ';', '-': '[', '_': '{',
+                '=': ']', '+': '}', '[': '/', '{': '?', ']': '=', '}': '+',
+                ';': 's', ':': 'S', '\'': '-', '"': '_', ',': 'w', '<': 'W',
+                '.': 'v', '>': 'V', '/': 'z', '?': 'Z',
+            },
+        };
+        var mapName = null;
+
+        return {
+            fromCharCode: function(charCode) {
+                var char = String.fromCharCode(charCode);
+                return maps[mapName][char] !== undefined ? maps[mapName][char] : char;
+            },
+            setMap: function(aMapName) {
+                if (maps[mapName] !== undefined) {
+                    mapName = aMapName;
+                } else {
+                    mapName = null;
+                }
+            },
+        };
+    })();
+
     var keyboardLayout = (function() {
         var layouts = {
             qwerty: ['QWERTYUIOP[]', 'ASDFGHJKL;\'', 'ZXCVBNM,./'],
@@ -271,8 +234,8 @@
     keyboardLayout.renderLayout($('#dvorak-layout'), 'dvorak');
 
     $('#map-dvorak').on('change', function() {
-        var layoutMapper = $(this).is(':checked') ? dvorakLayoutMapper : null;
-        keyboardMapper.setLayoutMapper(layoutMapper);
+        var mapName = $(this).is(':checked') ? 'qwertyToDvorak' : null;
+        keyboardMapper.setMap(mapName);
         $(this).blur();
         return false;
     });
@@ -288,9 +251,11 @@
             controller.backspaceTyped();
             return false;
         }
+    });
 
+    $(document).on('keypress', function(e) {
         // Normal keys
-        var letter = keyboardMapper.fromCharCode(e.keyCode, e.shiftKey);
+        var letter = keyboardMapper.fromCharCode(e.charCode);
         if (letter) {
             controller.letterTyped(letter);
             return false;

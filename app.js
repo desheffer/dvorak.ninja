@@ -138,13 +138,31 @@
     };
 
     var ParagraphSelector = function(paragraphs, container) {
+        function shuffle(arr) {
+            var temp, j, i = arr.length;
+            while (--i) {
+                j = ~~(Math.random() * (i + 1));
+                temp = arr[i];
+                arr[i] = arr[j];
+                arr[j] = temp;
+            }
+
+            return arr;
+        }
+
         for (i in paragraphs) {
             var li = $('<li>');
             $('<a href="#">')
                 .text(paragraphs[i].name)
                 .data('paragraph', paragraphs[i].text)
+                .data('shuffle', paragraphs[i].shuffle === true)
                 .on('click', function() {
-                    controller.start($(this).data('paragraph'), 3);
+                    var paragraph = $(this).data('paragraph');
+                    if ($(this).data('shuffle') === true) {
+                        paragraph = shuffle(paragraph.split(' ')).join(' ');
+                    }
+
+                    controller.start(paragraph, 3);
 
                     container.find('li a.active').removeClass('active');
                     $(this).addClass('active').blur();

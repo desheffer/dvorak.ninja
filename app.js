@@ -37,7 +37,7 @@
                 type.removeClass('completed');
             }
 
-            renderStats('--', '--', '--', '--');
+            renderStats('--', '--', '--', '-:--');
         };
 
         this.renderCountdown = function (seconds) {
@@ -47,9 +47,9 @@
                 type.removeClass('completed');
             }
 
-            type.find('.overlay').text(Math.ceil(seconds));
+            type.find('.overlay').text('- ' + Math.ceil(seconds) + ' -');
 
-            renderStats(0, 0, 0, 0);
+            renderStats(0, 0, 0, '0:00');
         };
 
         this.renderProgress = function(isCompleted, correctlyTyped, incorrectlyTyped, notYetTyped, seconds) {
@@ -74,11 +74,14 @@
             var words = correctlyTyped.length / 5;
             var wpm = words / (seconds / 60);
 
+            var min = Math.floor(seconds / 60);
+            var sec = Math.floor(seconds - min * 60);
+
             renderStats(
                 Math.round(wpm ? wpm : 0),
                 characters,
                 Math.floor(words),
-                Math.floor(seconds)
+                min + ':' + (sec < 10 ? '0' + sec : sec)
             );
         };
     };

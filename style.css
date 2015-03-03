@@ -81,7 +81,8 @@ meter::-webkit-meter-even-less-good-value {
     text-align: center;
 }
 #stats .wpm-meter meter {
-    margin-top: 2em;
+    height: 1.5em;
+    margin-top: 1.6em;
     width: 100%;
 }
 #paragraphs {

@@ -74,13 +74,13 @@
             var words = correctlyTyped.length / 5;
             var wpm = words / (seconds / 60);
 
-            var min = Math.floor(seconds / 60);
-            var sec = Math.floor(seconds - min * 60);
+            var min = ~~(seconds / 60);
+            var sec = ~~(seconds - min * 60);
 
             renderStats(
                 Math.round(wpm ? wpm : 0),
                 characters,
-                Math.floor(words),
+                ~~words,
                 min + ':' + (sec < 10 ? '0' + sec : sec)
             );
         };
@@ -177,28 +177,31 @@
     };
 
     var Controller = function(clock, typeBox, keyboardLayoutRenderer) {
-        var wordsToType = null;
-        var correctlyTyped = null;
-        var incorrectlyTyped = null;
-        var notYetTyped = null;
-        var startTime = null;
+        var wordsToType;
+        var correctlyTyped;
+        var incorrectlyTyped;
+        var notYetTyped;
+        var startTime;
 
         var isActive = false;
-        var timer = null;
+        var timer;
 
         function tick() {
             var now = clock.time();
 
-            isActive = (startTime !== null && now > startTime && notYetTyped !== null && notYetTyped !== '');
+            isActive = (startTime !== undefined && now > startTime && notYetTyped !== undefined && notYetTyped !== '');
 
-            var isCountdown = (startTime !== null && now < startTime);
+            var isCountdown = (startTime !== undefined && now < startTime);
             var isCompleted = (!isCountdown && notYetTyped === '');
 
             if (isCountdown) {
+                // Game is counting down
                 typeBox.renderCountdown(startTime - now);
             } else if (isActive || isCompleted) {
+                // Game is in progress or completed
                 typeBox.renderProgress(isCompleted, correctlyTyped, incorrectlyTyped, notYetTyped, now - startTime);
             } else {
+                // Game has not started
                 typeBox.renderInitial();
             }
 
@@ -209,7 +212,7 @@
             }
 
             clearInterval(timer);
-            timer = null;
+            timer = undefined;
 
             if (isCountdown || isActive) {
                 timer = setTimeout(tick, 100);
@@ -236,9 +239,11 @@
             var expected = notYetTyped.substr(0, 1);
 
             if (incorrectlyTyped.length === 0 && letter === expected) {
+                // Add a correct letter
                 correctlyTyped = correctlyTyped + letter;
                 notYetTyped = notYetTyped.substr(1);
             } else if (incorrectlyTyped.length <= 10) {
+                // Add an incorrect letter
                 incorrectlyTyped = incorrectlyTyped + letter;
             }
 
@@ -251,8 +256,10 @@
             }
 
             if (incorrectlyTyped.length > 0) {
+                // Remove an incorrect letter
                 incorrectlyTyped = incorrectlyTyped.substr(0, incorrectlyTyped.length - 1);
             } else if (correctlyTyped.length > 0) {
+                // Remove a correct letter
                 notYetTyped = correctlyTyped[correctlyTyped.length - 1] + notYetTyped;
                 correctlyTyped = correctlyTyped.substr(0, correctlyTyped.length - 1);
             }
@@ -285,11 +292,11 @@
 
         this.fromCharCode = function(charCode) {
             var char = String.fromCharCode(charCode);
-            return maps[mapName][char] !== undefined ? maps[mapName][char] : char;
+            return maps[mapName][char] || char;
         };
 
         this.changeMap = function(newMapName) {
-            if (maps[mapName] !== undefined) {
+            if (maps[newMapName] !== undefined) {
                 mapName = newMapName;
             } else {
                 mapName = null;

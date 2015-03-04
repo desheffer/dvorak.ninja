@@ -22,12 +22,37 @@
     };
 
     var TypeBox = function(type, stats) {
+        function renderTextAndStats(correctlyTyped, incorrectlyTyped, notYetTyped, seconds) {
+            var remaining = notYetTyped.substr(incorrectlyTyped.length)
+            type.find('.correct').text(correctlyTyped);
+            type.find('.incorrect').text(incorrectlyTyped);
+            type.find('.remaining').text(remaining);
+
+            var characters = correctlyTyped.length;
+            var words = correctlyTyped.length / 5;
+            var wpm = words / (seconds / 60);
+
+            renderStats(
+                Math.round(wpm ? wpm : 0),
+                characters,
+                ~~words,
+                seconds
+            );
+        }
+
         function renderStats(wpm, characters, words, seconds) {
-            stats.find('.wpm .value').text(wpm);
+            var time;
+            if (seconds !== undefined) {
+                var min = ~~(seconds / 60);
+                var sec = ~~(seconds - min * 60);
+                time = min + ':' + (sec < 10 ? '0' + sec : sec);
+            }
+
+            stats.find('.wpm .value').text(wpm !== undefined ? wpm : '--');
             stats.find('.wpm-meter meter').val(isFinite(wpm) ? wpm : 0);
-            stats.find('.characters .value').text(characters);
-            stats.find('.words .value').text(words);
-            stats.find('.seconds .value').text(seconds);
+            stats.find('.characters .value').text(characters !== undefined ? characters : '--');
+            stats.find('.words .value').text(words !== undefined ? words : '--');
+            stats.find('.time .value').text(time != undefined ? time : '-:--');
         }
 
         this.renderInitial = function () {
@@ -37,7 +62,7 @@
                 type.removeClass('completed');
             }
 
-            renderStats('--', '--', '--', '-:--');
+            renderStats();
         };
 
         this.renderCountdown = function (seconds) {
@@ -49,10 +74,10 @@
 
             type.find('.overlay').text('- ' + Math.ceil(seconds) + ' -');
 
-            renderStats(0, 0, 0, '0:00');
+            renderTextAndStats('', '', '', 0);
         };
 
-        this.renderProgress = function(isCompleted, correctlyTyped, incorrectlyTyped, notYetTyped, seconds) {
+        this.renderProgress = function(correctlyTyped, incorrectlyTyped, notYetTyped, seconds) {
             if (type.data('mode') !== 'progress') {
                 type.data('mode', 'progress');
                 type.html(
@@ -61,28 +86,22 @@
                     + '<span class="cursor"></span>'
                     + '<span class="remaining"></span>'
                 );
+                type.removeClass('completed');
             }
 
-            type.toggleClass('completed', isCompleted);
+            renderTextAndStats(correctlyTyped, incorrectlyTyped, notYetTyped, seconds);
+        };
 
-            var remaining = notYetTyped.substr(incorrectlyTyped.length)
-            type.find('.correct').text(correctlyTyped);
-            type.find('.incorrect').text(incorrectlyTyped);
-            type.find('.remaining').text(remaining);
+        this.renderCompleted = function(correctlyTyped, seconds, histogram, incorrect) {
+            if (type.data('mode') !== 'completed') {
+                type.data('mode', 'completed');
+                type.html(
+                    '<span class="correct"></span>'
+                );
+                type.addClass('completed');
+            }
 
-            var characters = correctlyTyped.length;
-            var words = correctlyTyped.length / 5;
-            var wpm = words / (seconds / 60);
-
-            var min = ~~(seconds / 60);
-            var sec = ~~(seconds - min * 60);
-
-            renderStats(
-                Math.round(wpm ? wpm : 0),
-                characters,
-                ~~words,
-                min + ':' + (sec < 10 ? '0' + sec : sec)
-            );
+            renderTextAndStats(correctlyTyped, '', '', seconds);
         };
     };
 
@@ -186,22 +205,42 @@
         var isActive = false;
         var timer;
 
+        var histogram;
+        var incorrectCount;
+
+        function calculateHistogram() {
+            var endTime = clock.time();
+
+            var avgHistogram = [];
+            for (var i = ~~startTime; i < endTime; i++) {
+                var chars = 0;
+                var count = 5;
+                for (var j = i - count + 1; j <= i; j++) {
+                    chars += histogram[j] || 0;
+                }
+
+                // WPM = CPS * 60 sec/min * 1/5 words/char, averaged over count
+                var wpm = chars * 60 / 5 / count;
+                avgHistogram.push(wpm);
+            }
+
+            return avgHistogram;
+        }
+
         function tick() {
             var now = clock.time();
 
             isActive = (startTime !== undefined && now > startTime && notYetTyped !== undefined && notYetTyped !== '');
-
             var isCountdown = (startTime !== undefined && now < startTime);
             var isCompleted = (!isCountdown && notYetTyped === '');
 
             if (isCountdown) {
-                // Game is counting down
                 typeBox.renderCountdown(startTime - now);
-            } else if (isActive || isCompleted) {
-                // Game is in progress or completed
-                typeBox.renderProgress(isCompleted, correctlyTyped, incorrectlyTyped, notYetTyped, now - startTime);
+            } else if (isActive) {
+                typeBox.renderProgress(correctlyTyped, incorrectlyTyped, notYetTyped, now - startTime);
+            } else if (isCompleted) {
+                typeBox.renderCompleted(correctlyTyped, now - startTime, calculateHistogram(), incorrectCount);
             } else {
-                // Game has not started
                 typeBox.renderInitial();
             }
 
@@ -228,6 +267,9 @@
             correctlyTyped = incorrectlyTyped = '';
             startTime = clock.time() + timeout;
 
+            histogram = {};
+            incorrectCount = 0;
+
             tick();
         };
 
@@ -242,9 +284,14 @@
                 // Add a correct letter
                 correctlyTyped = correctlyTyped + letter;
                 notYetTyped = notYetTyped.substr(1);
+
+                // Record it in the histogram
+                var time = ~~clock.time();
+                histogram[time] = (histogram[time] || 0) + 1;
             } else if (incorrectlyTyped.length <= 10) {
                 // Add an incorrect letter
                 incorrectlyTyped = incorrectlyTyped + letter;
+                incorrectCount++;
             }
 
             tick();
@@ -262,6 +309,10 @@
                 // Remove a correct letter
                 notYetTyped = correctlyTyped[correctlyTyped.length - 1] + notYetTyped;
                 correctlyTyped = correctlyTyped.substr(0, correctlyTyped.length - 1);
+
+                // Record it in the histogram
+                var time = ~~clock.time();
+                histogram[time] = (histogram[time] || 0) - 1;
             }
 
             tick();

@@ -97,9 +97,25 @@
                 type.data('mode', 'completed');
                 type.html(
                     '<span class="correct"></span>'
+                    + '<div class="ct-chart"></div>'
                 );
                 type.addClass('completed');
             }
+
+            var chart = new Chartist.Line(type.find('.ct-chart').get(0), {
+                labels: Object.keys(histogram),
+                series: [ histogram ],
+            }, {
+                low: 0,
+                showArea: true,
+                showPoint: false,
+                height: type.height(),
+                fullWidth: true,
+                axisX: {
+                    showLabel: false,
+                    showGrid: false,
+                },
+            });
 
             renderTextAndStats(correctlyTyped, '', '', seconds);
         };

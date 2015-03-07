@@ -26,6 +26,7 @@ meter::-webkit-meter-even-less-good-value {
     font-size: 14pt;
     min-height: 15em;
     padding: 10px;
+    position: relative;
     white-space: pre-wrap;
 }
 #type .overlay {
@@ -54,16 +55,13 @@ meter::-webkit-meter-even-less-good-value {
 #type .remaining {
     color: #777;
 }
-#type.completed {
-    background-color: #dff0d8;
-}
-#type.completed .cursor,
-#type.completed .incorrect,
-#type.completed .remaining {
-    display: none;
-}
-#type.completed .correct {
-    color: #777;
+#type .ct-chart {
+    background-color: rgba(255, 255, 255, 0.9);
+    bottom: 0;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
 }
 #stats {
     background-color: #eee;

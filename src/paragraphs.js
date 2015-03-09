@@ -1,4 +1,6 @@
 (function() {
+    "use strict";
+
     window.paragraphs = [
         {
             name: "Dvorak 1 [AEOUHTNS]",

@@ -1,12 +1,22 @@
 module.exports = function(grunt) {
+  'use strict';
 
   require('load-grunt-tasks')(grunt);
   require('time-grunt')(grunt);
 
-  // Project configuration.
   grunt.initConfig({
 
     pkg: grunt.file.readJSON('package.json'),
+
+    jshint: {
+      options: {
+        jshintrc: '.jshintrc',
+      },
+      all: [
+        'Gruntfile.js',
+        'src/**/*.js',
+      ],
+    },
 
     clean: {
       dist: {
@@ -90,6 +100,7 @@ module.exports = function(grunt) {
   });
 
   grunt.registerTask('build', [
+    'jshint',
     'clean',
     'copy',
     'concat',

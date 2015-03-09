@@ -35,6 +35,9 @@ module.exports = function(grunt) {
 
     concat: {
       css: {
+        options: {
+          banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n',
+        },
         src: [
           'src/style.css',
         ],
@@ -48,6 +51,9 @@ module.exports = function(grunt) {
         dest: 'dist/vendor.min.css',
       },
       js: {
+        options: {
+          banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n',
+        },
         src: [
           'src/paragraphs.js',
           'src/app.js',
@@ -65,10 +71,7 @@ module.exports = function(grunt) {
     },
 
     cssmin: {
-      options: {
-        banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n',
-      },
-      build: {
+      dist: {
         src: 'dist/<%= pkg.name %>.css',
         dest: 'dist/<%= pkg.name %>.min.css',
       },
@@ -76,9 +79,9 @@ module.exports = function(grunt) {
 
     uglify: {
       options: {
-        banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n',
+        preserveComments: 'some',
       },
-      build: {
+      dist: {
         src: 'dist/<%= pkg.name %>.js',
         dest: 'dist/<%= pkg.name %>.min.js',
       },

@@ -1,4 +1,7 @@
+/*! wpm 2015-03-08 */
 (function() {
+    "use strict";
+
     window.paragraphs = [
         {
             name: "Dvorak 1 [AEOUHTNS]",
@@ -28,6 +31,7 @@
     ];
 })();
 
+/* global Chartist: false */
 /**
  * Copyright (C) 2015 Doug Sheffer <desheffer@gmail.com>
  *
@@ -44,7 +48,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-(function($) {
+(function($, Chartist) {
+    'use strict';
+
     var Clock = function() {
         this.time = function() {
             return new Date().getTime() / 1000;
@@ -53,7 +59,7 @@
 
     var TypeBox = function(type, stats) {
         function renderTextAndStats(correctlyTyped, incorrectlyTyped, notYetTyped, seconds) {
-            var remaining = notYetTyped.substr(incorrectlyTyped.length)
+            var remaining = notYetTyped.substr(incorrectlyTyped.length);
             type.find('.correct').text(correctlyTyped);
             type.find('.incorrect').text(incorrectlyTyped);
             type.find('.remaining').text(remaining);
@@ -82,7 +88,7 @@
             stats.find('.wpm-meter meter').val(isFinite(wpm) ? wpm : 0);
             stats.find('.characters .value').text(characters !== undefined ? characters : '--');
             stats.find('.words .value').text(words !== undefined ? words : '--');
-            stats.find('.time .value').text(time != undefined ? time : '-:--');
+            stats.find('.time .value').text(time !== undefined ? time : '-:--');
         }
 
         this.renderInitial = function () {
@@ -111,10 +117,10 @@
             if (type.data('mode') !== 'progress') {
                 type.data('mode', 'progress');
                 type.html(
-                    '<span class="correct"></span>'
-                    + '<span class="incorrect"></span>'
-                    + '<span class="cursor"></span>'
-                    + '<span class="remaining"></span>'
+                    '<span class="correct"></span>' +
+                    '<span class="incorrect"></span>' +
+                    '<span class="cursor"></span>' +
+                    '<span class="remaining"></span>'
                 );
                 type.removeClass('completed');
             }
@@ -122,17 +128,17 @@
             renderTextAndStats(correctlyTyped, incorrectlyTyped, notYetTyped, seconds);
         };
 
-        this.renderCompleted = function(correctlyTyped, seconds, histogram, incorrect) {
+        this.renderCompleted = function(correctlyTyped, seconds, histogram /* , incorrect */) {
             if (type.data('mode') !== 'completed') {
                 type.data('mode', 'completed');
                 type.html(
-                    '<span class="correct"></span>'
-                    + '<div class="ct-chart"></div>'
+                    '<span class="correct"></span>' +
+                    '<div class="ct-chart"></div>'
                 );
                 type.addClass('completed');
             }
 
-            var chart = new Chartist.Line(type.find('.ct-chart').get(0), {
+            new Chartist.Line(type.find('.ct-chart').get(0), {
                 labels: Object.keys(histogram),
                 series: [ histogram ],
             }, {
@@ -167,13 +173,13 @@
         var nextKey = null;
 
         function renderLayout(container, layout) {
-            for (i in layout) {
+            for (var i in layout) {
                 var row = $('<div class="row-' + i + '">');
                 for (var j = 0; j < layout[i].length; j++) {
                     var key = $('<span class="key">')
                         .text(layout[i][j][0])
-                        .toggleClass('home', i == 1 && (0 <= j && j <= 3 || 6 <= j && j <= 9))
-                        .toggleClass('bump', i == 1 && (j === 3 || j === 6))
+                        .toggleClass('home', i === 1 && (0 <= j && j <= 3 || 6 <= j && j <= 9))
+                        .toggleClass('bump', i === 1 && (j === 3 || j === 6))
                         .appendTo(row);
 
                     for (var k in layout[i][j]) {
@@ -218,27 +224,28 @@
             return arr;
         }
 
-        for (i in paragraphs) {
+        for (var i in paragraphs) {
             var li = $('<li>');
-            $('<a href="#">')
+            $('<a class="paragraph" href="#">')
                 .text(paragraphs[i].name)
                 .data('paragraph', paragraphs[i].text)
                 .data('shuffle', paragraphs[i].shuffle === true)
-                .on('click', function() {
-                    var paragraph = $(this).data('paragraph');
-                    if ($(this).data('shuffle') === true) {
-                        paragraph = shuffle(paragraph.split(' ')).join(' ');
-                    }
-
-                    controller.start(paragraph, 3);
-
-                    container.find('li a.active').removeClass('active');
-                    $(this).addClass('active').blur();
-                    return false;
-                })
                 .appendTo(li);
             li.appendTo(container);
         }
+
+        container.find('a.paragraph').on('click', function() {
+            var paragraph = $(this).data('paragraph');
+            if ($(this).data('shuffle') === true) {
+                paragraph = shuffle(paragraph.split(' ')).join(' ');
+            }
+
+            controller.start(paragraph, 3);
+
+            container.find('li a.active').removeClass('active');
+            $(this).addClass('active').blur();
+            return false;
+        });
     };
 
     var Controller = function(clock, typeBox, keyboardLayoutRenderer) {
@@ -435,10 +442,10 @@
 
     var typeBox = new TypeBox($('#type'), $('#stats'));
     var keyboardLayoutsRenderer = new KeyboardLayoutsRenderer($('#qwerty-layout'), $('#dvorak-layout'));
-    var paragraphSelector = new ParagraphSelector(window.paragraphs, $('#paragraphs'));
+    new ParagraphSelector(window.paragraphs, $('#paragraphs'));
 
     var clock = new Clock();
     var controller = new Controller(clock, typeBox, keyboardLayoutsRenderer);
     var keyboardMapper = new KeyboardMapper();
-    var input = new Input($(document), controller, $('#map-qwerty-to-dvorak'), keyboardMapper);
-})($);
+    new Input($(document), controller, $('#map-qwerty-to-dvorak'), keyboardMapper);
+})(jQuery, Chartist);

@@ -1,0 +1,16 @@
+{
+  "name": "wpm",
+  "version": "0.1.0",
+  "main": "style.css",
+  "ignore": [
+    ".jshintrc",
+    "**/*.txt",
+    "node_modules",
+    "bower_components"
+  ],
+  "devDependencies": {
+    "bootstrap": "~3.3.2",
+    "chartist": "~0.7.3",
+    "jquery": "~2.1.3"
+  }
+}

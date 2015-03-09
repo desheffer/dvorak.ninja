@@ -20,6 +20,19 @@ module.exports = function(grunt) {
       },
     },
 
+    copy: {
+      dist: {
+        files: [{
+          expand: true,
+          cwd: 'bower_components/chartist/dist',
+          src: [
+            'chartist.min.js.map',
+          ],
+          dest: 'dist/',
+        }],
+      },
+    },
+
     concat: {
       css: {
         src: [
@@ -75,6 +88,7 @@ module.exports = function(grunt) {
 
   grunt.registerTask('build', [
     'clean',
+    'copy',
     'concat',
     'cssmin',
     'uglify',

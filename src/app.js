@@ -1,4 +1,5 @@
 /* global Chartist: false */
+/* global vex: false */
 /**
  * Copyright (C) 2015 Doug Sheffer <desheffer@gmail.com>
  *
@@ -15,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-(function($, Chartist) {
+(function($, Chartist, vex) {
     'use strict';
 
     var Clock = function() {
@@ -36,7 +37,7 @@
             var wpm = words / (seconds / 60);
 
             renderStats(
-                Math.round(wpm ? wpm : 0),
+                wpm ? ~~wpm : 0,
                 characters,
                 ~~words,
                 seconds
@@ -95,24 +96,27 @@
             renderTextAndStats(correctlyTyped, incorrectlyTyped, notYetTyped, seconds);
         };
 
-        this.renderCompleted = function(correctlyTyped, seconds, histogram /* , incorrect */) {
+        this.renderCompleted = function(correctlyTyped, seconds, histogram, incorrect) {
             if (type.data('mode') !== 'completed') {
                 type.data('mode', 'completed');
-                type.html(
-                    '<span class="correct"></span>' +
-                    '<div class="ct-chart"></div>'
-                );
+                type.html('<span class="correct"></span>');
                 type.addClass('completed');
             }
 
-            new Chartist.Line(type.find('.ct-chart').get(0), {
+            renderTextAndStats(correctlyTyped, '', '', seconds);
+
+            var score = vex.open({});
+
+            $('<h2>').text('Score card').appendTo(score);
+
+            var chart = $('<div class="ct-chart">').appendTo(score);
+
+            new Chartist.Line(chart.get(0), {
                 labels: Object.keys(histogram),
-                series: [ histogram ],
+                series: [histogram],
             }, {
-                low: 0,
                 showArea: true,
                 showPoint: false,
-                height: type.height(),
                 fullWidth: true,
                 axisX: {
                     showLabel: false,
@@ -120,7 +124,21 @@
                 },
             });
 
-            renderTextAndStats(correctlyTyped, '', '', seconds);
+            var accuracy = correctlyTyped.length / (correctlyTyped.length + incorrect) * 100;
+            var wpm = (correctlyTyped.length / 5) / (seconds / 60);
+
+            var max = 0;
+            for (var val in histogram) {
+                max = Math.max(max, histogram[val]);
+            }
+
+            var dl = $('<dl class="dl-horizontal">').appendTo(score);
+            $('<dt>').text('Accuracy:').appendTo(dl);
+            $('<dd>').text(~~accuracy + '%').appendTo(dl);
+            $('<dt>').text('Average WPM:').appendTo(dl);
+            $('<dd>').text(~~wpm).appendTo(dl);
+            $('<dt>').text('Maximum WPM:').appendTo(dl);
+            $('<dd>').text(~~max).appendTo(dl);
         };
     };
 
@@ -407,6 +425,8 @@
         });
     };
 
+    vex.defaultOptions.className = 'vex-theme-default';
+
     var typeBox = new TypeBox($('#type'), $('#stats'));
     var keyboardLayoutsRenderer = new KeyboardLayoutsRenderer($('#qwerty-layout'), $('#dvorak-layout'));
     new ParagraphSelector(window.paragraphs, $('#paragraphs'));
@@ -415,4 +435,4 @@
     var controller = new Controller(clock, typeBox, keyboardLayoutsRenderer);
     var keyboardMapper = new KeyboardMapper();
     new Input($(document), controller, $('#map-qwerty-to-dvorak'), keyboardMapper);
-})(jQuery, Chartist);
+})(jQuery, Chartist, vex);

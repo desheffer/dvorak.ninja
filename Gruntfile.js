@@ -57,6 +57,8 @@ module.exports = function(grunt) {
         src: [
           'bower_components/bootstrap/dist/css/bootstrap.min.css',
           'bower_components/chartist/dist/chartist.min.css',
+          'bower_components/vex/css/vex.css',
+          'bower_components/vex/css/vex-theme-default.css',
         ],
         dest: 'dist/vendor.css',
       },
@@ -75,6 +77,7 @@ module.exports = function(grunt) {
           'bower_components/jquery/dist/jquery.min.js',
           'bower_components/bootstrap/dist/js/bootstrap.min.js',
           'bower_components/chartist/dist/chartist.min.js',
+          'bower_components/vex/js/vex.min.js',
         ],
         dest: 'dist/vendor.js',
       },

@@ -131,6 +131,12 @@ meter::-webkit-meter-even-less-good-value {
     -webkit-transition-delay: 1s;
     transition-delay: 1s;
 }
+.vex-content {
+    font-family: inherit !important;
+}
+.vex-content h2 {
+    text-align: center;
+}
 @keyframes blink {
     to {
         visibility: hidden;

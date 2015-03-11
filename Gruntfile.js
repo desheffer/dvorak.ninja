@@ -58,7 +58,7 @@ module.exports = function(grunt) {
           'bower_components/bootstrap/dist/css/bootstrap.min.css',
           'bower_components/chartist/dist/chartist.min.css',
         ],
-        dest: 'dist/vendor.min.css',
+        dest: 'dist/vendor.css',
       },
       js: {
         options: {
@@ -76,14 +76,18 @@ module.exports = function(grunt) {
           'bower_components/bootstrap/dist/js/bootstrap.min.js',
           'bower_components/chartist/dist/chartist.min.js',
         ],
-        dest: 'dist/vendor.min.js',
+        dest: 'dist/vendor.js',
       },
     },
 
     cssmin: {
-      dist: {
+      css: {
         src: 'dist/<%= pkg.name %>.css',
         dest: 'dist/<%= pkg.name %>.min.css',
+      },
+      vendorcss: {
+        src: 'dist/vendor.css',
+        dest: 'dist/vendor.min.css',
       },
     },
 
@@ -91,9 +95,13 @@ module.exports = function(grunt) {
       options: {
         preserveComments: 'some',
       },
-      dist: {
+      js: {
         src: 'dist/<%= pkg.name %>.js',
         dest: 'dist/<%= pkg.name %>.min.js',
+      },
+      vendorjs: {
+        src: 'dist/vendor.js',
+        dest: 'dist/vendor.min.js',
       },
     },
 

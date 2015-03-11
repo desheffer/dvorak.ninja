@@ -113,12 +113,12 @@
             }
 
             var dl = $('<dl class="dl-horizontal">').appendTo(score);
-            $('<dt>').text('Accuracy:').appendTo(dl);
-            $('<dd>').text(~~accuracy + '%').appendTo(dl);
             $('<dt>').text('Average WPM:').appendTo(dl);
             $('<dd>').text(~~wpm).appendTo(dl);
             $('<dt>').text('Maximum WPM:').appendTo(dl);
             $('<dd>').text(~~max).appendTo(dl);
+            $('<dt>').text('Accuracy:').appendTo(dl);
+            $('<dd>').text(~~accuracy + '%').appendTo(dl);
         };
     };
 

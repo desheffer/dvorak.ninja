@@ -1,4 +1,4 @@
-/*! wpm 2015-03-08 */
+/*! wpm 2015-03-11 */
 body {
     font-family: Consolas, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
     margin: 5em auto;
@@ -131,6 +131,12 @@ meter::-webkit-meter-even-less-good-value {
     color: white;
     -webkit-transition-delay: 1s;
     transition-delay: 1s;
+}
+.vex-content {
+    font-family: inherit !important;
+}
+.vex-content h2 {
+    text-align: center;
 }
 @keyframes blink {
     to {

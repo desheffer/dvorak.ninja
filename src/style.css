@@ -55,14 +55,6 @@ meter::-webkit-meter-even-less-good-value {
 #type .remaining {
     color: #777;
 }
-#type .ct-chart {
-    background-color: rgba(255, 255, 255, 0.9);
-    bottom: 0;
-    left: 0;
-    position: absolute;
-    right: 0;
-    top: 0;
-}
 #stats {
     background-color: #eee;
     border-radius: 0 0 10px 10px;
@@ -136,6 +128,12 @@ meter::-webkit-meter-even-less-good-value {
 }
 .vex-content h2 {
     text-align: center;
+}
+.ct-chart .ct-series.ct-series-a .ct-line {
+    stroke: #337ab7;
+}
+.ct-chart .ct-series.ct-series-a .ct-area {
+    fill: #337ab7;
 }
 @keyframes blink {
     to {

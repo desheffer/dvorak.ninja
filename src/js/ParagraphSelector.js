@@ -22,14 +22,21 @@
                 .text(paragraphs[i].name)
                 .data('paragraph', paragraphs[i].text)
                 .data('shuffle', paragraphs[i].shuffle === true)
+                .data('limit', paragraphs[i].limit)
                 .appendTo(li);
             li.appendTo(container);
         }
 
         container.find('a.paragraph').on('click', function() {
             var paragraph = $(this).data('paragraph');
+
             if ($(this).data('shuffle') === true) {
                 paragraph = shuffle(paragraph.split(' ')).join(' ');
+            }
+
+            var limit = $(this).data('limit');
+            if (limit > 0) {
+                paragraph = paragraph.split(' ').slice(0, limit).join(' ');
             }
 
             controller.start(paragraph, 3);

@@ -4,64 +4,98 @@
     window.WPM = window.WPM || {};
 
     window.WPM.Game = function(clock, typeBox, keyboardLayoutRenderer) {
+        var that = this;
+
+        var modes = this.modes = {
+            IDLE: 0,
+            COUNTDOWN: 1,
+            PLAYING: 2,
+            COMPLETE: 3,
+        };
+
+        var mode = modes.IDLE;
+        var startTime;
+        var timer;
+
         var wordsToType;
         var correctlyTyped;
         var incorrectlyTyped;
         var notYetTyped;
-        var startTime;
-
-        var isActive = false;
-        var timer;
-
-        var histogram;
         var incorrectCount;
 
-        function calculateHistogram() {
-            var endTime = clock.time();
+        function updateMode() {
+            var now = clock.time();
+            var newMode = modes.IDLE;
 
-            var avgHistogram = [];
-            for (var i = ~~startTime; i < endTime; i++) {
-                var chars = 0;
-                var count = 5;
-                for (var j = i - count + 1; j <= i; j++) {
-                    chars += histogram[j] || 0;
-                }
-
-                // WPM = CPS * 60 sec/min * 1/5 words/char, averaged over count
-                var wpm = chars * 60 / 5 / count;
-                avgHistogram.push(wpm);
+            if (startTime !== undefined && now < startTime) {
+                newMode = modes.COUNTDOWN;
+            } else if (startTime !== undefined && now > startTime && notYetTyped !== undefined && notYetTyped.length > 0) {
+                newMode = modes.PLAYING;
+            } else if (notYetTyped === '') {
+                newMode = modes.COMPLETE;
             }
 
-            return avgHistogram;
+            if (newMode !== mode) {
+                mode = newMode;
+
+                $(that).trigger({
+                    type: 'modechange.wpm',
+                    mode: mode,
+                });
+            }
         }
 
-        function tick() {
+        // @TODO: Remove
+        function updateStatus() {
             var now = clock.time();
 
-            isActive = (startTime !== undefined && now > startTime && notYetTyped !== undefined && notYetTyped !== '');
-            var isCountdown = (startTime !== undefined && now < startTime);
-            var isCompleted = (!isCountdown && notYetTyped === '');
-
-            if (isCountdown) {
+            if (mode === modes.COUNTDOWN) {
                 typeBox.renderCountdown(startTime - now);
-            } else if (isActive) {
+            } else if (mode === modes.PLAYING) {
                 typeBox.renderProgress(correctlyTyped, incorrectlyTyped, notYetTyped, now - startTime);
-            } else if (isCompleted) {
-                typeBox.renderCompleted(correctlyTyped, now - startTime, calculateHistogram(), incorrectCount);
-            } else {
+            } else if (mode === modes.COMPLETE) {
+                typeBox.renderCompleted(correctlyTyped, now - startTime, [], incorrectCount);
+            } else if (mode === modes.IDLE) {
                 typeBox.renderInitial();
             }
 
-            if (isActive && incorrectlyTyped.length === 0) {
+            if (mode === modes.PLAYING && incorrectlyTyped.length === 0) {
                 keyboardLayoutRenderer.renderNextKey(notYetTyped[0]);
             } else {
                 keyboardLayoutRenderer.clearNextKey();
             }
+        }
 
+        function tick() {
             clearInterval(timer);
             timer = undefined;
 
-            if (isCountdown || isActive) {
+            updateMode();
+            updateStatus();
+
+            if (mode === modes.COUNTDOWN) {
+                $(that).trigger({
+                    type: 'countdown.wpm',
+                    countdown: startTime - clock.time(),
+                });
+            }
+
+            if (mode === modes.PLAYING || mode === modes.COMPLETE) {
+                var seconds = clock.time() - startTime;
+                var characters = correctlyTyped.length;
+                var words = correctlyTyped.length / 5;
+                var wpm = words / (seconds / 60);
+
+                $(that).trigger({
+                    type: 'score.wpm',
+                    seconds: seconds,
+                    characters: characters,
+                    words: words,
+                    wpm: wpm,
+                });
+            }
+
+            if (mode === modes.COUNTDOWN || mode === modes.PLAYING) {
                 timer = setTimeout(tick, 100);
             }
         }
@@ -71,18 +105,17 @@
                 timeout = 0;
             }
 
-            wordsToType = notYetTyped = words;
-            correctlyTyped = incorrectlyTyped = '';
             startTime = clock.time() + timeout;
 
-            histogram = {};
+            wordsToType = notYetTyped = words;
+            correctlyTyped = incorrectlyTyped = '';
             incorrectCount = 0;
 
             tick();
         };
 
         this.letterTyped = function(letter) {
-            if (!isActive) {
+            if (mode !== modes.PLAYING) {
                 return;
             }
 
@@ -92,21 +125,28 @@
                 // Add a correct letter
                 correctlyTyped = correctlyTyped + letter;
                 notYetTyped = notYetTyped.substr(1);
-
-                // Record it in the histogram
-                var time = ~~clock.time();
-                histogram[time] = (histogram[time] || 0) + 1;
             } else if (incorrectlyTyped.length <= 10) {
                 // Add an incorrect letter
                 incorrectlyTyped = incorrectlyTyped + letter;
                 incorrectCount++;
+            } else {
+                return;
             }
+
+            $(that).trigger({
+                type: 'textchange.wpm',
+                correctlyTyped: correctlyTyped,
+                incorrectlyTyped: incorrectlyTyped,
+                notYetTyped: notYetTyped,
+                incorrectCount: incorrectCount,
+                nextLetter: notYetTyped[0],
+            });
 
             tick();
         };
 
         this.backspaceTyped = function() {
-            if (!isActive) {
+            if (mode !== modes.PLAYING) {
                 return;
             }
 
@@ -117,11 +157,17 @@
                 // Remove a correct letter
                 notYetTyped = correctlyTyped[correctlyTyped.length - 1] + notYetTyped;
                 correctlyTyped = correctlyTyped.substr(0, correctlyTyped.length - 1);
-
-                // Record it in the histogram
-                var time = ~~clock.time();
-                histogram[time] = (histogram[time] || 0) - 1;
+            } else {
+                return;
             }
+
+            $(that).trigger({
+                type: 'textchange.wpm',
+                correctlyTyped: correctlyTyped,
+                incorrectlyTyped: incorrectlyTyped,
+                notYetTyped: notYetTyped,
+                incorrectCount: incorrectCount,
+            });
 
             tick();
         };

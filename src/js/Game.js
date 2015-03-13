@@ -43,6 +43,23 @@
             clearInterval(timer);
             timer = undefined;
 
+            if (mode === modes.PLAYING || mode === modes.COMPLETE) {
+                var seconds = ($.now() - startTime) / 1000;
+                var characters = correctlyTyped.length;
+                var words = correctlyTyped.length / 5;
+                var wpm = words / (seconds / 60);
+                var accuracy = characters / (characters + incorrectCount) * 100;
+
+                $(that).trigger({
+                    type: 'scorechange.wpm',
+                    seconds: seconds,
+                    characters: characters,
+                    words: words,
+                    wpm: wpm,
+                    accuracy: accuracy,
+                });
+            }
+
             var oldMode = mode;
             mode = currentMode();
 
@@ -60,6 +77,7 @@
                     incorrectlyTyped: incorrectlyTyped,
                     notYetTyped: notYetTyped,
                     nextLetter: notYetTyped[0],
+                    change: 0,
                 });
             }
 
@@ -67,23 +85,6 @@
                 $(that).trigger({
                     type: 'countdown.wpm',
                     countdown: (startTime - $.now()) / 1000,
-                });
-            }
-
-            if (mode === modes.PLAYING || mode === modes.COMPLETE) {
-                var seconds = ($.now() - startTime) / 1000;
-                var characters = correctlyTyped.length;
-                var words = correctlyTyped.length / 5;
-                var wpm = words / (seconds / 60);
-                var accuracy = characters / (characters + incorrectCount) * 100;
-
-                $(that).trigger({
-                    type: 'scorechange.wpm',
-                    seconds: seconds,
-                    characters: characters,
-                    words: words,
-                    wpm: wpm,
-                    accuracy: accuracy,
                 });
             }
 
@@ -135,6 +136,7 @@
                 incorrectlyTyped: incorrectlyTyped,
                 notYetTyped: notYetTyped,
                 nextLetter: incorrectlyTyped ? false : notYetTyped[0],
+                change: 1,
             });
 
             tick();
@@ -162,6 +164,7 @@
                 incorrectlyTyped: incorrectlyTyped,
                 notYetTyped: notYetTyped,
                 nextLetter: incorrectlyTyped ? false : notYetTyped[0],
+                change: -1,
             });
 
             tick();

@@ -42,7 +42,7 @@
     $(game).on('countdown.wpm', typeBox.countdown);
     $(game).on('textchange.wpm', typeBox.textChanged);
     $(game).on('scorechange.wpm', typeBox.scoreChanged);
-    $(game).on('textchange.wpm', layoutBox.render);
+    $(game).on('textchange.wpm', layoutBox.textChanged);
 
     $(game).on('modechange.wpm', function(e) { console.log(e); });
     $(game).on('countdown.wpm', function(e) { console.log(e); });

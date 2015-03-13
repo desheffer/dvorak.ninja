@@ -16,7 +16,6 @@
                 [';:', 'Qq', 'Jj', 'Kk', 'Xx', 'Bb', 'Mm', 'Ww', 'Vv', 'Zz'],
             ],
         };
-        var nextKey = null;
 
         function renderLayout(container, layout) {
             for (var i in layout) {
@@ -36,21 +35,14 @@
             }
         }
 
-        this.clearNextKey = function() {
+        this.textChanged = function(e) {
             qwertyContainer.find('.key.next').removeClass('next');
             dvorakContainer.find('.key.next').removeClass('next');
-            nextKey = null;
-        };
 
-        this.renderNextKey = function(key) {
-            if (nextKey === key) {
-                return;
+            if (e.nextLetter !== undefined) {
+                qwertyContainer.find('.key.key-' + e.nextLetter.charCodeAt()).addClass('next');
+                dvorakContainer.find('.key.key-' + e.nextLetter.charCodeAt()).addClass('next');
             }
-
-            this.clearNextKey();
-            qwertyContainer.find('.key.key-' + key.charCodeAt()).addClass('next');
-            dvorakContainer.find('.key.key-' + key.charCodeAt()).addClass('next');
-            nextKey = key;
         };
 
         renderLayout(qwertyContainer, layouts.qwerty);

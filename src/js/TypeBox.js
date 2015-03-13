@@ -3,7 +3,7 @@
 
     window.WPM = window.WPM || {};
 
-    window.WPM.TypeBox = function(type, stats) {
+    window.WPM.TypeBox = function(type) {
         var modes = window.WPM.gameModes;
 
         this.modeChanged = function(e) {
@@ -24,20 +24,6 @@
                 type.find('.remaining').remove();
             }
 
-            if (e.mode === modes.COUNTDOWN || e.mode === modes.IDLE) {
-                stats.find('.wpm .value').text('--');
-                stats.find('.wpm-meter meter').val(0);
-                stats.find('.characters .value').text('--');
-                stats.find('.words .value').text('--');
-                stats.find('.time .value').text('-:--');
-            } else if (e.mode === modes.PLAYING) {
-                stats.find('.wpm .value').text(0);
-                stats.find('.wpm-meter meter').val(0);
-                stats.find('.characters .value').text(0);
-                stats.find('.words .value').text(0);
-                stats.find('.time .value').text('0:00');
-            }
-
             type.toggleClass('completed', e.mode === modes.COMPLETE);
         };
 
@@ -50,21 +36,6 @@
             type.find('.correct').text(e.correctlyTyped);
             type.find('.incorrect').text(e.incorrectlyTyped);
             type.find('.remaining').text(remaining);
-        };
-
-        this.scoreChanged = function(e) {
-            var time;
-            if (e.seconds !== undefined) {
-                var min = ~~(e.seconds / 60);
-                var sec = ~~(e.seconds - min * 60);
-                time = min + ':' + (sec < 10 ? '0' + sec : sec);
-            }
-
-            stats.find('.wpm .value').text(~~e.wpm);
-            stats.find('.wpm-meter meter').val(isFinite(e.wpm) ? e.wpm : 0);
-            stats.find('.characters .value').text(e.characters);
-            stats.find('.words .value').text(~~e.words);
-            stats.find('.time .value').text(time);
         };
     };
 })();

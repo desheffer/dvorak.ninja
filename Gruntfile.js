@@ -73,6 +73,7 @@ module.exports = function(grunt) {
           'src/js/LayoutBox.js',
           'src/js/ParaBox.js',
           'src/js/ScoreCard.js',
+          'src/js/StatsBox.js',
           'src/js/TypeBox.js',
           'src/js/paragraphs.js',
           'src/js/app.js',

@@ -25,41 +25,42 @@
     // Input
 
     var keyboardMapper = new WPM.KeyboardMapper();
-    // @TODO: var input = new WPM.Input($(document), keyboardMapper);
+
     new WPM.Input($(document), game, $('#map-qwerty-to-dvorak'), keyboardMapper);
-
-    // View
-
-    // @TODO: var paraBox = new WPM.ParaBox($('#para-box'), WPM.paragraphs);
-    new WPM.ParaBox(WPM.paragraphs, $('#paragraphs'), game);
-
+    // @TODO
+    // var input = new WPM.Input($(document), keyboardMapper);
     // $(input).on('letterpress', game.letterPressed);
     // $(input).on('backspacepress', game.backspacePressed);
-    // $(layoutBox).on('layoutchange', keyboardMapper.layoutChanged);
 
-    var typeBox = new WPM.TypeBox($('#type'), $('#stats'));
-    // @TODO: var statsBox = new WPM.StatsBox($('#stats-box'));
+    // Views
 
+    new WPM.ParaBox(WPM.paragraphs, $('#paragraphs'), game);
+    // @TODO
+    // var paraBox = new WPM.ParaBox($('#para-box'), WPM.paragraphs);
+
+    var typeBox = new WPM.TypeBox($('#type'));
     $(game).on('modechange.wpm', typeBox.modeChanged);
     $(game).on('countdown.wpm', typeBox.countdown);
     $(game).on('textchange.wpm', typeBox.textChanged);
-    $(game).on('scorechange.wpm', typeBox.scoreChanged);
+
+    var statsBox = new WPM.StatsBox($('#stats'));
+    $(game).on('modechange.wpm', statsBox.modeChanged);
+    $(game).on('scorechange.wpm', statsBox.scoreChanged);
 
     var layoutBox = new WPM.LayoutBox($('#qwerty-layout'), $('#dvorak-layout'));
-
     $(game).on('textchange.wpm', layoutBox.textChanged);
+    // @TODO
+    // $(layoutBox).on('layoutchange', keyboardMapper.layoutChanged);
 
     var scoreCard = new WPM.ScoreCard();
-
     $(game).on('modechange.wpm', scoreCard.modeChanged);
     $(game).on('textchange.wpm', scoreCard.textChanged);
     $(game).on('scorechange.wpm', scoreCard.scoreChanged);
 
-
+    // Debug
     $(game).on('modechange.wpm', function(e) { console.log(e); });
     $(game).on('textchange.wpm', function(e) { console.log(e); });
     $(game).on('scorechange.wpm', function(e) { console.log(e); });
-
 
     game.init();
 })($);

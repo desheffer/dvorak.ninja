@@ -67,7 +67,6 @@ module.exports = function(grunt) {
           banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n',
         },
         src: [
-          'src/js/Clock.js',
           'src/js/Game.js',
           'src/js/Input.js',
           'src/js/KeyboardMapper.js',

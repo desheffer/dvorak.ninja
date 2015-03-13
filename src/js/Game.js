@@ -1,19 +1,21 @@
-(function() {
+(function($) {
     'use strict';
 
     window.WPM = window.WPM || {};
 
-    window.WPM.Game = function(clock, typeBox, keyboardLayoutRenderer) {
+    window.WPM.gameModes = {
+        IDLE: 0,
+        COUNTDOWN: 1,
+        PLAYING: 2,
+        COMPLETE: 3,
+    };
+
+    window.WPM.Game = function() {
         var that = this;
 
-        var modes = this.modes = {
-            IDLE: 0,
-            COUNTDOWN: 1,
-            PLAYING: 2,
-            COMPLETE: 3,
-        };
+        var modes = window.WPM.gameModes;
 
-        var mode = modes.IDLE;
+        var mode;
         var startTime;
         var timer;
 
@@ -23,75 +25,65 @@
         var notYetTyped;
         var incorrectCount;
 
-        function updateMode() {
-            var now = clock.time();
-            var newMode = modes.IDLE;
+        function currentMode() {
+            var now = $.now();
 
             if (startTime !== undefined && now < startTime) {
-                newMode = modes.COUNTDOWN;
+                return modes.COUNTDOWN;
             } else if (startTime !== undefined && now > startTime && notYetTyped !== undefined && notYetTyped.length > 0) {
-                newMode = modes.PLAYING;
+                return modes.PLAYING;
             } else if (notYetTyped === '') {
-                newMode = modes.COMPLETE;
+                return modes.COMPLETE;
             }
 
-            if (newMode !== mode) {
-                mode = newMode;
-
-                $(that).trigger({
-                    type: 'modechange.wpm',
-                    mode: mode,
-                });
-            }
-        }
-
-        // @TODO: Remove
-        function updateStatus() {
-            var now = clock.time();
-
-            if (mode === modes.COUNTDOWN) {
-                typeBox.renderCountdown(startTime - now);
-            } else if (mode === modes.PLAYING) {
-                typeBox.renderProgress(correctlyTyped, incorrectlyTyped, notYetTyped, now - startTime);
-            } else if (mode === modes.COMPLETE) {
-                typeBox.renderCompleted(correctlyTyped, now - startTime, [], incorrectCount);
-            } else if (mode === modes.IDLE) {
-                typeBox.renderInitial();
-            }
-
-            if (mode === modes.PLAYING && incorrectlyTyped.length === 0) {
-                keyboardLayoutRenderer.renderNextKey(notYetTyped[0]);
-            } else {
-                keyboardLayoutRenderer.clearNextKey();
-            }
+            return modes.IDLE;
         }
 
         function tick() {
             clearInterval(timer);
             timer = undefined;
 
-            updateMode();
-            updateStatus();
+            var oldMode = mode;
+            mode = currentMode();
+
+            if (mode !== oldMode) {
+                $(that).trigger({
+                    type: 'modechange.wpm',
+                    mode: mode,
+                });
+            }
+
+            if (mode !== oldMode && mode === modes.PLAYING) {
+                $(that).trigger({
+                    type: 'textchange.wpm',
+                    correctlyTyped: correctlyTyped,
+                    incorrectlyTyped: incorrectlyTyped,
+                    notYetTyped: notYetTyped,
+                    nextLetter: notYetTyped[0],
+                });
+            }
 
             if (mode === modes.COUNTDOWN) {
                 $(that).trigger({
                     type: 'countdown.wpm',
-                    countdown: startTime - clock.time(),
+                    countdown: (startTime - $.now()) / 1000,
                 });
             }
 
             if (mode === modes.PLAYING || mode === modes.COMPLETE) {
-                var seconds = clock.time() - startTime;
+                var seconds = ($.now() - startTime) / 1000;
                 var characters = correctlyTyped.length;
                 var words = correctlyTyped.length / 5;
                 var wpm = words / (seconds / 60);
+                var accuracy = characters / (characters + incorrectCount) * 100;
 
                 $(that).trigger({
-                    type: 'score.wpm',
+                    type: 'scorechange.wpm',
                     seconds: seconds,
                     characters: characters,
                     words: words,
                     wpm: wpm,
+                    accuracy: accuracy,
                 });
             }
 
@@ -100,12 +92,16 @@
             }
         }
 
+        this.init = function() {
+            tick();
+        };
+
         this.start = function(words, timeout) {
             if (timeout === undefined) {
                 timeout = 0;
             }
 
-            startTime = clock.time() + timeout;
+            startTime = $.now() + timeout * 1000;
 
             wordsToType = notYetTyped = words;
             correctlyTyped = incorrectlyTyped = '';
@@ -138,7 +134,6 @@
                 correctlyTyped: correctlyTyped,
                 incorrectlyTyped: incorrectlyTyped,
                 notYetTyped: notYetTyped,
-                incorrectCount: incorrectCount,
                 nextLetter: notYetTyped[0],
             });
 
@@ -166,12 +161,10 @@
                 correctlyTyped: correctlyTyped,
                 incorrectlyTyped: incorrectlyTyped,
                 notYetTyped: notYetTyped,
-                incorrectCount: incorrectCount,
+                nextLetter: false,
             });
 
             tick();
         };
-
-        tick();
     };
-})();
+})(jQuery);

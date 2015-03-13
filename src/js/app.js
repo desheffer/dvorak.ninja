@@ -18,12 +18,36 @@
 (function($) {
     'use strict';
 
-    var clock = new WPM.Clock();
-    var typeBox = new WPM.TypeBox($('#type'), $('#stats'));
-    var layoutBox = new WPM.LayoutBox($('#qwerty-layout'), $('#dvorak-layout'));
-    var keyboardMapper = new WPM.KeyboardMapper();
+    // Game
+    var game = new WPM.Game();
 
-    var game = new WPM.Game(clock, typeBox, layoutBox);
-    new WPM.ParaBox(WPM.paragraphs, $('#paragraphs'), game);
+    // Input
+    // @TODO: var keyboardMapper = new WPM.KeyboardMapper();
+    var keyboardMapper = new WPM.KeyboardMapper();
+    // @TODO: var input = new WPM.Input($(document), keyboardMapper);
     new WPM.Input($(document), game, $('#map-qwerty-to-dvorak'), keyboardMapper);
+
+    // View
+    // @TODO: var paraBox = new WPM.ParaBox($('#para-box'), WPM.paragraphs);
+    new WPM.ParaBox(WPM.paragraphs, $('#paragraphs'), game);
+    var typeBox = new WPM.TypeBox($('#type'), $('#stats')); // @TODO: Split to statsBox
+    // @TODO: var statsBox = new WPM.StatsBox($('#stats-box'));
+    var layoutBox = new WPM.LayoutBox($('#qwerty-layout'), $('#dvorak-layout')); // @TODO: Consolidate to one selector
+
+    // $(input).on('letterpress', game.letterPressed);
+    // $(input).on('backspacepress', game.backspacePressed);
+    // $(layoutBox).on('layoutchange', keyboardMapper.layoutChanged);
+
+    $(game).on('modechange.wpm', typeBox.modeChanged);
+    $(game).on('countdown.wpm', typeBox.countdown);
+    $(game).on('textchange.wpm', typeBox.textChanged);
+    $(game).on('scorechange.wpm', typeBox.scoreChanged);
+    $(game).on('textchange.wpm', layoutBox.render);
+
+    $(game).on('modechange.wpm', function(e) { console.log(e); });
+    $(game).on('countdown.wpm', function(e) { console.log(e); });
+    $(game).on('textchange.wpm', function(e) { console.log(e); });
+    $(game).on('scorechange.wpm', function(e) { console.log(e); });
+
+    game.init();
 })($);

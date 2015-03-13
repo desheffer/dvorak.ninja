@@ -134,7 +134,7 @@
                 correctlyTyped: correctlyTyped,
                 incorrectlyTyped: incorrectlyTyped,
                 notYetTyped: notYetTyped,
-                nextLetter: notYetTyped[0],
+                nextLetter: incorrectlyTyped ? false : notYetTyped[0],
             });
 
             tick();
@@ -161,7 +161,7 @@
                 correctlyTyped: correctlyTyped,
                 incorrectlyTyped: incorrectlyTyped,
                 notYetTyped: notYetTyped,
-                nextLetter: false,
+                nextLetter: incorrectlyTyped ? false : notYetTyped[0],
             });
 
             tick();

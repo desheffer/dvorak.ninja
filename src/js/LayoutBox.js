@@ -39,7 +39,7 @@
             qwertyContainer.find('.key.next').removeClass('next');
             dvorakContainer.find('.key.next').removeClass('next');
 
-            if (e.nextLetter !== undefined) {
+            if (e.nextLetter) {
                 qwertyContainer.find('.key.key-' + e.nextLetter.charCodeAt()).addClass('next');
                 dvorakContainer.find('.key.key-' + e.nextLetter.charCodeAt()).addClass('next');
             }

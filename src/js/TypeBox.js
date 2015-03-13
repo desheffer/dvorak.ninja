@@ -18,6 +18,10 @@
                     '<span class="cursor"></span>' +
                     '<span class="remaining"></span>'
                 );
+            } else if (e.mode === modes.COMPLETE) {
+                type.find('.incorrect').remove();
+                type.find('.cursor').remove();
+                type.find('.remaining').remove();
             }
 
             if (e.mode === modes.PLAYING) {

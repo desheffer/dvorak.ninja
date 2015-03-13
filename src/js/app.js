@@ -20,10 +20,10 @@
 
     var clock = new WPM.Clock();
     var typeBox = new WPM.TypeBox($('#type'), $('#stats'));
-    var keyboardLayoutsRenderer = new WPM.KeyboardLayoutsRenderer($('#qwerty-layout'), $('#dvorak-layout'));
+    var layoutBox = new WPM.LayoutBox($('#qwerty-layout'), $('#dvorak-layout'));
     var keyboardMapper = new WPM.KeyboardMapper();
 
-    var controller = new WPM.Controller(clock, typeBox, keyboardLayoutsRenderer);
-    new WPM.ParagraphSelector(WPM.paragraphs, $('#paragraphs'), controller);
-    new WPM.Input($(document), controller, $('#map-qwerty-to-dvorak'), keyboardMapper);
+    var game = new WPM.Game(clock, typeBox, layoutBox);
+    new WPM.ParaBox(WPM.paragraphs, $('#paragraphs'), game);
+    new WPM.Input($(document), game, $('#map-qwerty-to-dvorak'), keyboardMapper);
 })($);

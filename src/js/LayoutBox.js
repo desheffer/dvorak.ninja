@@ -3,7 +3,7 @@
 
     window.WPM = window.WPM || {};
 
-    window.WPM.KeyboardLayoutsRenderer = function(qwertyContainer, dvorakContainer) {
+    window.WPM.LayoutBox = function(qwertyContainer, dvorakContainer) {
         var layouts = {
             qwerty: [
                 ['Qq', 'Ww', 'Ee', 'Rr', 'Tt', 'Yy', 'Uu', 'Ii', 'Oo', 'Pp', '[{', ']}'],

@@ -3,7 +3,7 @@
 
     window.WPM = window.WPM || {};
 
-    window.WPM.Controller = function(clock, typeBox, keyboardLayoutRenderer) {
+    window.WPM.Game = function(clock, typeBox, keyboardLayoutRenderer) {
         var wordsToType;
         var correctlyTyped;
         var incorrectlyTyped;

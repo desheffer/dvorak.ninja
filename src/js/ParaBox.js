@@ -3,7 +3,7 @@
 
     window.WPM = window.WPM || {};
 
-    window.WPM.ParagraphSelector = function(paragraphs, container, controller) {
+    window.WPM.ParaBox = function(paragraphs, container, controller) {
         function shuffle(arr) {
             var temp, j, i = arr.length;
             while (--i) {

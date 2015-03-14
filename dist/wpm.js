@@ -117,12 +117,14 @@
                 return;
             }
 
+            var delta = 0;
             var expected = notYetTyped.substr(0, 1);
 
             if (incorrectlyTyped.length === 0 && letter === expected) {
                 // Add a correct letter
                 correctlyTyped = correctlyTyped + letter;
                 notYetTyped = notYetTyped.substr(1);
+                delta = 1;
             } else if (incorrectlyTyped.length <= 10) {
                 // Add an incorrect letter
                 incorrectlyTyped = incorrectlyTyped + letter;
@@ -137,7 +139,7 @@
                 incorrectlyTyped: incorrectlyTyped,
                 notYetTyped: notYetTyped,
                 nextLetter: incorrectlyTyped ? false : notYetTyped[0],
-                change: 1,
+                change: delta,
             });
 
             tick();
@@ -148,6 +150,8 @@
                 return;
             }
 
+            var delta = 0;
+
             if (incorrectlyTyped.length > 0) {
                 // Remove an incorrect letter
                 incorrectlyTyped = incorrectlyTyped.substr(0, incorrectlyTyped.length - 1);
@@ -155,6 +159,7 @@
                 // Remove a correct letter
                 notYetTyped = correctlyTyped[correctlyTyped.length - 1] + notYetTyped;
                 correctlyTyped = correctlyTyped.substr(0, correctlyTyped.length - 1);
+                delta = -1;
             } else {
                 return;
             }
@@ -165,7 +170,7 @@
                 incorrectlyTyped: incorrectlyTyped,
                 notYetTyped: notYetTyped,
                 nextLetter: incorrectlyTyped ? false : notYetTyped[0],
-                change: -1,
+                change: delta,
             });
 
             tick();

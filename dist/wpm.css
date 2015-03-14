@@ -1,7 +1,7 @@
 /*! wpm 2015-03-14 */
 body {
     font-family: Consolas, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
-    margin: 5em auto;
+    padding: 5em 0;
 }
 meter,
 meter::-webkit-meter-bar {
@@ -20,7 +20,7 @@ meter::-webkit-meter-even-less-good-value {
     background: #d9534f;
     border-radius: 3px;
 }
-#type {
+#type-box {
     background-color: white;
     border: 1px solid #777;
     font-family: Consolas, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
@@ -30,12 +30,12 @@ meter::-webkit-meter-even-less-good-value {
     position: relative;
     white-space: pre-wrap;
 }
-#type .overlay {
+#type-box .overlay {
     font-size: 32pt;
     margin-top: 2em;
     text-align: center;
 }
-#type .cursor {
+#type-box .cursor {
     animation: blink 1s steps(2, start) infinite;
     -moz-animation: blink 1s steps(2, start) infinite;
     -webkit-animation: blink 1s steps(2, start) infinite;
@@ -46,45 +46,45 @@ meter::-webkit-meter-even-less-good-value {
     position: absolute;
     width: 2px;
 }
-#type .correct {
+#type-box .correct {
     color: #ccc;
 }
-#type .incorrect {
+#type-box .incorrect {
     background-color: #d9534f;
     color: black;
 }
-#type .remaining {
+#type-box .remaining {
     color: #777;
 }
-#stats {
+#stats-box {
     background-color: #eee;
     border-radius: 0 0 10px 10px;
     padding-bottom: 1em;
     padding-top: 1em;
 }
-#stats .stat {
+#stats-box .stat {
     font-size: 10pt;
     font-weight: bold;
     text-align: center;
 }
-#stats .value {
+#stats-box .value {
     font-size: 14pt;
     text-align: center;
 }
-#stats .wpm-meter meter {
+#stats-box .wpm-meter meter {
     height: 1.5em;
     margin-top: 1.6em;
     width: 100%;
 }
-#paragraphs {
+#para-box {
     margin-top: 1em;
 }
-#paragraphs a {
+#para-box a {
     border-radius: 10px;
     padding: 0 0.5em;
     text-decoration: underline;
 }
-#paragraphs a.active {
+#para-box a.active {
     background-color: #eee;
     color: black;
     text-decoration: none;
@@ -121,8 +121,28 @@ meter::-webkit-meter-even-less-good-value {
 .layout .keyboard .key.next {
     background-color: #337ab7;
     color: white;
+    -moz-transition-delay: 1s;
     -webkit-transition-delay: 1s;
     transition-delay: 1s;
+}
+#social-box {
+    display: none; /* @TODO */
+    background-color: white;
+    bottom: 0;
+    left: 0;
+    padding: 0.5em 0;
+    position: fixed;
+    right: 0;
+}
+#social-box .avatar {
+    border: 1px solid #777;
+    display: inline-block;
+    height: 1em;
+    margin-bottom: -0.1em;
+    width: 1em;
+}
+#social-box .user-count {
+    text-align: right;
 }
 .vex-content {
     font-family: inherit !important;

@@ -3,7 +3,9 @@
 
     window.WPM = window.WPM || {};
 
-    window.WPM.Input = function(document, controller, mapQwertyToDvorakCheckbox, keyboardMapper) {
+    window.WPM.Input = function(document, keyboardMapper) {
+        var that = this;
+
         document.on('keydown', function(e) {
             // Ignore keyboard shortcuts
             if (e.altKey || e.ctrlKey || e.metaKey) {
@@ -12,7 +14,10 @@
 
             // Backspace
             if (e.keyCode === 8) {
-                controller.backspaceTyped();
+                $(that).trigger({
+                    type: 'backspacepress.wpm',
+                });
+
                 return false;
             }
         });
@@ -21,17 +26,13 @@
             // Normal keys
             var letter = keyboardMapper.fromCharCode(e.charCode);
             if (letter) {
-                controller.letterTyped(letter);
+                $(that).trigger({
+                    type: 'letterpress.wpm',
+                    letter: letter,
+                });
+
                 return false;
             }
         });
-
-        mapQwertyToDvorakCheckbox.on('change', function() {
-            var mapName = $(this).is(':checked') ? 'qwertyToDvorak' : null;
-            keyboardMapper.changeMap(mapName);
-
-            $(this).blur();
-            return false;
-        });
     };
-})($);
+})(jQuery);

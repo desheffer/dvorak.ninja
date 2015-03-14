@@ -3,7 +3,9 @@
 
     window.WPM = window.WPM || {};
 
-    window.WPM.ParaBox = function(paragraphs, container, controller) {
+    window.WPM.ParaBox = function(paragraphs, container) {
+        var that = this;
+
         function shuffle(arr) {
             var temp, j, i = arr.length;
             while (--i) {
@@ -39,11 +41,14 @@
                 paragraph = paragraph.split(' ').slice(0, limit).join(' ');
             }
 
-            controller.start(paragraph, 3);
+            $(that).trigger({
+                type: 'paragraphchange.wpm',
+                paragraph: paragraph,
+            });
 
             container.find('li a.active').removeClass('active');
             $(this).addClass('active').blur();
             return false;
         });
     };
-})($);
+})(jQuery);

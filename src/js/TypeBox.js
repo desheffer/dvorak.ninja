@@ -1,126 +1,41 @@
-/* global Chartist: false */
-/* global vex: false */
-(function($, Chartist, vex) {
+(function() {
     'use strict';
 
     window.WPM = window.WPM || {};
 
-    window.WPM.TypeBox = function(type, stats) {
-        function renderTextAndStats(correctlyTyped, incorrectlyTyped, notYetTyped, seconds) {
-            var remaining = notYetTyped.substr(incorrectlyTyped.length);
-            type.find('.correct').text(correctlyTyped);
-            type.find('.incorrect').text(incorrectlyTyped);
-            type.find('.remaining').text(remaining);
+    window.WPM.TypeBox = function(type) {
+        var modes = window.WPM.gameModes;
 
-            var characters = correctlyTyped.length;
-            var words = correctlyTyped.length / 5;
-            var wpm = words / (seconds / 60);
-
-            renderStats(
-                wpm ? ~~wpm : 0,
-                characters,
-                ~~words,
-                seconds
-            );
-        }
-
-        function renderStats(wpm, characters, words, seconds) {
-            var time;
-            if (seconds !== undefined) {
-                var min = ~~(seconds / 60);
-                var sec = ~~(seconds - min * 60);
-                time = min + ':' + (sec < 10 ? '0' + sec : sec);
-            }
-
-            stats.find('.wpm .value').text(wpm !== undefined ? wpm : '--');
-            stats.find('.wpm-meter meter').val(isFinite(wpm) ? wpm : 0);
-            stats.find('.characters .value').text(characters !== undefined ? characters : '--');
-            stats.find('.words .value').text(words !== undefined ? words : '--');
-            stats.find('.time .value').text(time !== undefined ? time : '-:--');
-        }
-
-        this.renderInitial = function () {
-            if (type.data('mode') !== 'initial') {
-                type.data('mode', 'initial');
+        this.modeChanged = function(e) {
+            if (e.mode === modes.IDLE) {
                 type.html('<div class="overlay">Select a paragraph from above</div>');
-                type.removeClass('completed');
-            }
-
-            renderStats();
-        };
-
-        this.renderCountdown = function (seconds) {
-            if (type.data('mode') !== 'countdown') {
-                type.data('mode', 'countdown');
+            } else if (e.mode === modes.COUNTDOWN) {
                 type.html('<div class="overlay"></div>');
-                type.removeClass('completed');
-            }
-
-            type.find('.overlay').text('- ' + Math.ceil(seconds) + ' -');
-
-            renderTextAndStats('', '', '', 0);
-        };
-
-        this.renderProgress = function(correctlyTyped, incorrectlyTyped, notYetTyped, seconds) {
-            if (type.data('mode') !== 'progress') {
-                type.data('mode', 'progress');
+            } else if (e.mode === modes.PLAYING) {
                 type.html(
                     '<span class="correct"></span>' +
                     '<span class="incorrect"></span>' +
                     '<span class="cursor"></span>' +
                     '<span class="remaining"></span>'
                 );
-                type.removeClass('completed');
+            } else if (e.mode === modes.COMPLETE) {
+                type.find('.incorrect').remove();
+                type.find('.cursor').remove();
+                type.find('.remaining').remove();
             }
 
-            renderTextAndStats(correctlyTyped, incorrectlyTyped, notYetTyped, seconds);
+            type.toggleClass('completed', e.mode === modes.COMPLETE);
         };
 
-        this.renderCompleted = function(correctlyTyped, seconds, histogram, incorrect) {
-            if (type.data('mode') !== 'completed') {
-                type.data('mode', 'completed');
-                type.html('<span class="correct"></span>');
-                type.addClass('completed');
-            }
+        this.countdown = function(e) {
+            type.find('.overlay').text('- ' + Math.ceil(e.countdown) + ' -');
+        };
 
-            renderTextAndStats(correctlyTyped, '', '', seconds);
-
-            var score = vex.open({});
-
-            $('<h2>').text('Score card').appendTo(score);
-
-            var chart = $('<div class="ct-chart">').appendTo(score);
-
-            new Chartist.Line(chart.get(0), {
-                labels: Object.keys(histogram),
-                series: [histogram],
-            }, {
-                showArea: true,
-                showPoint: false,
-                fullWidth: true,
-                axisX: {
-                    showLabel: false,
-                    showGrid: false,
-                },
-            });
-
-            var accuracy = correctlyTyped.length / (correctlyTyped.length + incorrect) * 100;
-            var wpm = (correctlyTyped.length / 5) / (seconds / 60);
-
-            var max = 0;
-            for (var val in histogram) {
-                max = Math.max(max, histogram[val]);
-            }
-
-            var dl = $('<dl class="dl-horizontal">').appendTo(score);
-            $('<dt>').text('Average WPM:').appendTo(dl);
-            $('<dd>').text(~~wpm).appendTo(dl);
-            $('<dt>').text('Maximum WPM:').appendTo(dl);
-            $('<dd>').text(~~max).appendTo(dl);
-            $('<dt>').text('Accuracy:').appendTo(dl);
-            $('<dd>').text(~~accuracy + '%').appendTo(dl);
+        this.textChanged = function(e) {
+            var remaining = e.notYetTyped.substr(e.incorrectlyTyped.length);
+            type.find('.correct').text(e.correctlyTyped);
+            type.find('.incorrect').text(e.incorrectlyTyped);
+            type.find('.remaining').text(remaining);
         };
     };
-
-    vex.defaultOptions.className = 'vex-theme-default';
-})($, Chartist, vex);
+})();

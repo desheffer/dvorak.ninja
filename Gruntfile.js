@@ -67,12 +67,13 @@ module.exports = function(grunt) {
           banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n',
         },
         src: [
-          'src/js/Clock.js',
-          'src/js/Controller.js',
+          'src/js/Game.js',
           'src/js/Input.js',
-          'src/js/KeyboardLayoutsRenderer.js',
           'src/js/KeyboardMapper.js',
-          'src/js/ParagraphSelector.js',
+          'src/js/LayoutBox.js',
+          'src/js/ParaBox.js',
+          'src/js/ScoreCard.js',
+          'src/js/StatsBox.js',
           'src/js/TypeBox.js',
           'src/js/paragraphs.js',
           'src/js/app.js',
@@ -127,5 +128,4 @@ module.exports = function(grunt) {
   ]);
 
   grunt.registerTask('default', ['build']);
-
 };

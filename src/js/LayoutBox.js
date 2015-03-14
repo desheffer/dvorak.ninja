@@ -1,9 +1,11 @@
-(function() {
+(function($) {
     'use strict';
 
     window.WPM = window.WPM || {};
 
-    window.WPM.KeyboardLayoutsRenderer = function(qwertyContainer, dvorakContainer) {
+    window.WPM.LayoutBox = function(qwertyContainer, dvorakContainer, mapQwertyToDvorakCheckbox) {
+        var that = this;
+
         var layouts = {
             qwerty: [
                 ['Qq', 'Ww', 'Ee', 'Rr', 'Tt', 'Yy', 'Uu', 'Ii', 'Oo', 'Pp', '[{', ']}'],
@@ -16,7 +18,6 @@
                 [';:', 'Qq', 'Jj', 'Kk', 'Xx', 'Bb', 'Mm', 'Ww', 'Vv', 'Zz'],
             ],
         };
-        var nextKey = null;
 
         function renderLayout(container, layout) {
             for (var i in layout) {
@@ -36,24 +37,29 @@
             }
         }
 
-        this.clearNextKey = function() {
+        this.textChanged = function(e) {
             qwertyContainer.find('.key.next').removeClass('next');
             dvorakContainer.find('.key.next').removeClass('next');
-            nextKey = null;
-        };
 
-        this.renderNextKey = function(key) {
-            if (nextKey === key) {
-                return;
+            if (e.nextLetter) {
+                qwertyContainer.find('.key.key-' + e.nextLetter.charCodeAt()).addClass('next');
+                dvorakContainer.find('.key.key-' + e.nextLetter.charCodeAt()).addClass('next');
             }
-
-            this.clearNextKey();
-            qwertyContainer.find('.key.key-' + key.charCodeAt()).addClass('next');
-            dvorakContainer.find('.key.key-' + key.charCodeAt()).addClass('next');
-            nextKey = key;
         };
+
+        mapQwertyToDvorakCheckbox.on('change', function() {
+            var mapName = $(this).is(':checked') ? 'qwertyToDvorak' : null;
+
+            $(that).trigger({
+                type: 'layoutchange.wpm',
+                mapName: mapName,
+            });
+
+            $(this).blur();
+            return false;
+        });
 
         renderLayout(qwertyContainer, layouts.qwerty);
         renderLayout(dvorakContainer, layouts.dvorak);
     };
-})();
+})(jQuery);

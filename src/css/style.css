@@ -135,6 +135,9 @@ meter::-webkit-meter-even-less-good-value {
 .ct-chart .ct-series.ct-series-a .ct-area {
     fill: #337ab7;
 }
+.ct-chart .ct-series.ct-series-b .ct-area {
+    fill: none;
+}
 @keyframes blink {
     to {
         visibility: hidden;

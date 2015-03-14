@@ -75,7 +75,7 @@ module.exports = function(grunt) {
           'src/js/ScoreCard.js',
           'src/js/StatsBox.js',
           'src/js/TypeBox.js',
-          'src/js/paragraphs.js',
+          'src/js/config.js',
           'src/js/app.js',
         ],
         dest: 'dist/<%= pkg.name %>.js',

@@ -9,10 +9,18 @@
         var user;
 
         firebase.authAnonymously(function(error, authData) {
-            if (!error) {
+            if (authData) {
                 user = authData;
-                console.log('user uid:', user.uid);
+
+                var userRef = firebase.child('presence').child(user.uid);
+                userRef.onDisconnect().remove();
+                userRef.set(true);
             }
+        });
+
+        firebase.child('presence').on('value', function(snapshot) {
+            var count = Object.keys(snapshot.val()).length;
+            console.log(count + ' users online');
         });
 
         this.scoreChanged = function(e) {
@@ -20,7 +28,7 @@
                 return;
             }
 
-            firebase.child(user.uid).push({
+            firebase.child('score').child(user.uid).push({
                 timeStamp: e.timeStamp,
                 paragraphName: e.paragraphName,
                 score: {

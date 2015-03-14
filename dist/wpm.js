@@ -5,10 +5,10 @@
     window.WPM = window.WPM || {};
 
     window.WPM.gameModes = {
-        IDLE: 0,
-        COUNTDOWN: 1,
-        PLAYING: 2,
-        COMPLETE: 3,
+        IDLE: 'idle',
+        COUNTDOWN: 'countdown',
+        PLAYING: 'playing',
+        COMPLETE: 'complete',
     };
 
     window.WPM.Game = function() {
@@ -20,6 +20,7 @@
         var startTime;
         var timer;
 
+        var paragraphName;
         var wordsToType;
         var correctlyTyped;
         var incorrectlyTyped;
@@ -44,7 +45,10 @@
             clearInterval(timer);
             timer = undefined;
 
-            if (mode === modes.PLAYING || mode === modes.COMPLETE) {
+            var oldMode = mode;
+            mode = currentMode();
+
+            if (oldMode === modes.PLAYING) {
                 var seconds = ($.now() - startTime) / 1000;
                 var characters = correctlyTyped.length;
                 var words = correctlyTyped.length / 5;
@@ -58,20 +62,20 @@
                     words: words,
                     wpm: wpm,
                     accuracy: accuracy,
+                    paragraphName: paragraphName,
+                    complete: mode !== modes.PLAYING,
                 });
             }
-
-            var oldMode = mode;
-            mode = currentMode();
 
             if (mode !== oldMode) {
                 $(that).trigger({
                     type: 'modechange.wpm',
                     mode: mode,
+                    oldMode: oldMode,
                 });
             }
 
-            if (mode !== oldMode && mode === modes.PLAYING) {
+            if (oldMode === modes.COUNTDOWN && mode === modes.PLAYING) {
                 $(that).trigger({
                     type: 'textchange.wpm',
                     correctlyTyped: correctlyTyped,
@@ -98,13 +102,15 @@
             tick();
         };
 
-        this.start = function(words, timeout) {
+        this.start = function(name, words, timeout) {
             if (timeout === undefined) {
                 timeout = 0;
             }
 
+            mode = undefined;
             startTime = $.now() + timeout * 1000;
 
+            paragraphName = name;
             wordsToType = notYetTyped = words;
             correctlyTyped = incorrectlyTyped = '';
             incorrectCount = 0;
@@ -296,6 +302,11 @@
             }
         }
 
+        this.modeChanged = function() {
+            qwertyContainer.find('.key.next').removeClass('next');
+            dvorakContainer.find('.key.next').removeClass('next');
+        };
+
         this.textChanged = function(e) {
             qwertyContainer.find('.key.next').removeClass('next');
             dvorakContainer.find('.key.next').removeClass('next');
@@ -368,6 +379,7 @@
 
             $(that).trigger({
                 type: 'paragraphchange.wpm',
+                name: $(this).text(),
                 paragraph: paragraph,
             });
 
@@ -385,8 +397,6 @@
 
     window.WPM = window.WPM || {};
 
-    vex.defaultOptions.className = 'vex-theme-default';
-
     window.WPM.ScoreCard = function() {
         var modes = window.WPM.gameModes;
 
@@ -398,18 +408,7 @@
         var wpmMax;
         var accuracy;
 
-        this.modeChanged = function(e) {
-            if (e.mode === modes.PLAYING) {
-                startTime = $.now();
-                cpsLog = {};
-                wpmLog = {};
-                wpmAverage = wpmMax = accuracy = 0;
-            }
-
-            if (e.mode !== modes.COMPLETE) {
-                return;
-            }
-
+        function showScoreCard() {
             var score = vex.open({});
 
             $('<h2>').text('Score card').appendTo(score);
@@ -447,6 +446,15 @@
             $('<dd>').text(~~wpmMax).appendTo(dl);
             $('<dt>').text('Accuracy:').appendTo(dl);
             $('<dd>').text(~~accuracy + '%').appendTo(dl);
+        }
+
+        this.modeChanged = function(e) {
+            if (e.mode === modes.PLAYING) {
+                startTime = $.now();
+                cpsLog = {};
+                wpmLog = {};
+                wpmAverage = wpmMax = accuracy = 0;
+            }
         };
 
         this.textChanged = function(e) {
@@ -461,9 +469,49 @@
             wpmAverage = e.wpm;
             wpmMax = Math.max(wpmMax, e.wpm);
             accuracy = e.accuracy;
+
+            if (e.complete) {
+                showScoreCard();
+            }
         };
     };
 })($, vex, Chartist);
+
+/* global Firebase: false */
+(function($, Firebase) {
+    'use strict';
+
+    window.WPM = window.WPM || {};
+
+    window.WPM.SocialBox = function() {
+        var firebase = new Firebase(window.WPM.firebaseURL);
+        var user;
+
+        firebase.authAnonymously(function(error, authData) {
+            if (!error) {
+                user = authData;
+                console.log('user uid:', user.uid);
+            }
+        });
+
+        this.scoreChanged = function(e) {
+            if (e.complete !== true) {
+                return;
+            }
+
+            firebase.child(user.uid).push({
+                timeStamp: e.timeStamp,
+                paragraphName: e.paragraphName,
+                score: {
+                    seconds: e.seconds,
+                    words: e.words,
+                    wpm: e.wpm,
+                    accuracy: e.accuracy,
+                },
+            });
+        };
+    };
+})($, Firebase);
 
 (function() {
     'use strict';
@@ -553,7 +601,15 @@
 
     window.WPM = window.WPM || {};
 
+    window.vex.defaultOptions.className = "vex-theme-default";
+
+    window.WPM.firebaseURL = "http://wpm.firebaseio.com/";
+
     window.WPM.paragraphs = [
+        {
+            name: "xxx",
+            text: "xxx",
+        },
         {
             name: "Dvorak 1 [aeouhtns]",
             text: "eats unset seats noses onto asset sane note oath nests shut hates shush tans sate hues tune oats shoot shoe auto shot autos totes antes tenet huts nest ethos host shoos tonne tan sooth stone net nose stuns anus east shout too shuts souse sheet one tenon son hose snots ton sent toes tees out senna nun tutus tease tunes sees tots that tho the state eases shoo aeon noon noose hath taste nosh hat hens tost hoes eons tutu teen neon hue ten anon nth tones neat tush anons sues ones set heats none teeth sea stun aunt stout",
@@ -616,7 +672,7 @@
     // Views
     var paraBox = new WPM.ParaBox(WPM.paragraphs, $('#paragraphs'));
     $(paraBox).on('paragraphchange.wpm', function(e) {
-        game.start(e.paragraph, 3);
+        game.start(e.name, e.paragraph, 3);
     });
 
     var typeBox = new WPM.TypeBox($('#type'));
@@ -629,6 +685,7 @@
     $(game).on('scorechange.wpm', statsBox.scoreChanged);
 
     var layoutBox = new WPM.LayoutBox($('#qwerty-layout'), $('#dvorak-layout'), $('#map-qwerty-to-dvorak'));
+    $(game).on('modechange.wpm', layoutBox.modeChanged);
     $(game).on('textchange.wpm', layoutBox.textChanged);
     $(layoutBox).on('layoutchange.wpm', function (e) {
         keyboardMapper.changeMap(e.mapName);
@@ -638,6 +695,9 @@
     $(game).on('modechange.wpm', scoreCard.modeChanged);
     $(game).on('textchange.wpm', scoreCard.textChanged);
     $(game).on('scorechange.wpm', scoreCard.scoreChanged);
+
+    var socialBox = new WPM.SocialBox();
+    $(game).on('scorechange.wpm', socialBox.scoreChanged);
 
     // Start the game loop
     game.init();

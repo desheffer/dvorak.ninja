@@ -9,10 +9,6 @@
 
     window.WPM.paragraphs = [
         {
-            name: "xxx",
-            text: "xxx",
-        },
-        {
             name: "Dvorak 1 [aeouhtns]",
             text: "eats unset seats noses onto asset sane note oath nests shut hates shush tans sate hues tune oats shoot shoe auto shot autos totes antes tenet huts nest ethos host shoos tonne tan sooth stone net nose stuns anus east shout too shuts souse sheet one tenon son hose snots ton sent toes tees out senna nun tutus tease tunes sees tots that tho the state eases shoo aeon noon noose hath taste nosh hat hens tost hoes eons tutu teen neon hue ten anon nth tones neat tush anons sues ones set heats none teeth sea stun aunt stout",
             shuffle: true,

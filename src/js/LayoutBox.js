@@ -1,4 +1,4 @@
-(function() {
+(function($) {
     'use strict';
 
     window.WPM = window.WPM || {};
@@ -62,4 +62,4 @@
         renderLayout(qwertyContainer, layouts.qwerty);
         renderLayout(dvorakContainer, layouts.dvorak);
     };
-})();
+})(jQuery);

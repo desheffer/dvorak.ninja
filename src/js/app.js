@@ -17,7 +17,7 @@
     });
 
     // Views
-    var paraBox = new WPM.ParaBox(WPM.paragraphs, $('#paragraphs'), game);
+    var paraBox = new WPM.ParaBox(WPM.paragraphs, $('#paragraphs'));
     $(paraBox).on('paragraphchange.wpm', function(e) {
         game.start(e.paragraph, 3);
     });
@@ -44,4 +44,4 @@
 
     // Start the game loop
     game.init();
-})($);
+})(jQuery);

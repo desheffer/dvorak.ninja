@@ -37,6 +37,11 @@
             }
         }
 
+        this.modeChanged = function() {
+            qwertyContainer.find('.key.next').removeClass('next');
+            dvorakContainer.find('.key.next').removeClass('next');
+        };
+
         this.textChanged = function(e) {
             qwertyContainer.find('.key.next').removeClass('next');
             dvorakContainer.find('.key.next').removeClass('next');

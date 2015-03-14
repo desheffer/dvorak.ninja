@@ -19,7 +19,7 @@
     // Views
     var paraBox = new WPM.ParaBox(WPM.paragraphs, $('#paragraphs'));
     $(paraBox).on('paragraphchange.wpm', function(e) {
-        game.start(e.paragraph, 3);
+        game.start(e.name, e.paragraph, 3);
     });
 
     var typeBox = new WPM.TypeBox($('#type'));
@@ -32,6 +32,7 @@
     $(game).on('scorechange.wpm', statsBox.scoreChanged);
 
     var layoutBox = new WPM.LayoutBox($('#qwerty-layout'), $('#dvorak-layout'), $('#map-qwerty-to-dvorak'));
+    $(game).on('modechange.wpm', layoutBox.modeChanged);
     $(game).on('textchange.wpm', layoutBox.textChanged);
     $(layoutBox).on('layoutchange.wpm', function (e) {
         keyboardMapper.changeMap(e.mapName);
@@ -41,6 +42,9 @@
     $(game).on('modechange.wpm', scoreCard.modeChanged);
     $(game).on('textchange.wpm', scoreCard.textChanged);
     $(game).on('scorechange.wpm', scoreCard.scoreChanged);
+
+    var socialBox = new WPM.SocialBox();
+    $(game).on('scorechange.wpm', socialBox.scoreChanged);
 
     // Start the game loop
     game.init();

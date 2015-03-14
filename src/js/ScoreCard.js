@@ -5,8 +5,6 @@
 
     window.WPM = window.WPM || {};
 
-    vex.defaultOptions.className = 'vex-theme-default';
-
     window.WPM.ScoreCard = function() {
         var modes = window.WPM.gameModes;
 
@@ -18,18 +16,7 @@
         var wpmMax;
         var accuracy;
 
-        this.modeChanged = function(e) {
-            if (e.mode === modes.PLAYING) {
-                startTime = $.now();
-                cpsLog = {};
-                wpmLog = {};
-                wpmAverage = wpmMax = accuracy = 0;
-            }
-
-            if (e.mode !== modes.COMPLETE) {
-                return;
-            }
-
+        function showScoreCard() {
             var score = vex.open({});
 
             $('<h2>').text('Score card').appendTo(score);
@@ -67,6 +54,15 @@
             $('<dd>').text(~~wpmMax).appendTo(dl);
             $('<dt>').text('Accuracy:').appendTo(dl);
             $('<dd>').text(~~accuracy + '%').appendTo(dl);
+        }
+
+        this.modeChanged = function(e) {
+            if (e.mode === modes.PLAYING) {
+                startTime = $.now();
+                cpsLog = {};
+                wpmLog = {};
+                wpmAverage = wpmMax = accuracy = 0;
+            }
         };
 
         this.textChanged = function(e) {
@@ -81,6 +77,10 @@
             wpmAverage = e.wpm;
             wpmMax = Math.max(wpmMax, e.wpm);
             accuracy = e.accuracy;
+
+            if (e.complete) {
+                showScoreCard();
+            }
         };
     };
 })($, vex, Chartist);

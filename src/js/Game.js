@@ -4,10 +4,10 @@
     window.WPM = window.WPM || {};
 
     window.WPM.gameModes = {
-        IDLE: 0,
-        COUNTDOWN: 1,
-        PLAYING: 2,
-        COMPLETE: 3,
+        IDLE: 'idle',
+        COUNTDOWN: 'countdown',
+        PLAYING: 'playing',
+        COMPLETE: 'complete',
     };
 
     window.WPM.Game = function() {
@@ -19,6 +19,7 @@
         var startTime;
         var timer;
 
+        var paragraphName;
         var wordsToType;
         var correctlyTyped;
         var incorrectlyTyped;
@@ -43,7 +44,10 @@
             clearInterval(timer);
             timer = undefined;
 
-            if (mode === modes.PLAYING || mode === modes.COMPLETE) {
+            var oldMode = mode;
+            mode = currentMode();
+
+            if (oldMode === modes.PLAYING) {
                 var seconds = ($.now() - startTime) / 1000;
                 var characters = correctlyTyped.length;
                 var words = correctlyTyped.length / 5;
@@ -57,20 +61,20 @@
                     words: words,
                     wpm: wpm,
                     accuracy: accuracy,
+                    paragraphName: paragraphName,
+                    complete: mode !== modes.PLAYING,
                 });
             }
-
-            var oldMode = mode;
-            mode = currentMode();
 
             if (mode !== oldMode) {
                 $(that).trigger({
                     type: 'modechange.wpm',
                     mode: mode,
+                    oldMode: oldMode,
                 });
             }
 
-            if (mode !== oldMode && mode === modes.PLAYING) {
+            if (oldMode === modes.COUNTDOWN && mode === modes.PLAYING) {
                 $(that).trigger({
                     type: 'textchange.wpm',
                     correctlyTyped: correctlyTyped,
@@ -97,13 +101,15 @@
             tick();
         };
 
-        this.start = function(words, timeout) {
+        this.start = function(name, words, timeout) {
             if (timeout === undefined) {
                 timeout = 0;
             }
 
+            mode = undefined;
             startTime = $.now() + timeout * 1000;
 
+            paragraphName = name;
             wordsToType = notYetTyped = words;
             correctlyTyped = incorrectlyTyped = '';
             incorrectCount = 0;

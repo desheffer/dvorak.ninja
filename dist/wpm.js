@@ -1,101 +1,119 @@
-/*! wpm 2015-03-11 */
-(function() {
+/*! wpm 2015-03-14 */
+(function($) {
     'use strict';
 
     window.WPM = window.WPM || {};
 
-    window.WPM.Clock = function() {
-        this.time = function() {
-            return new Date().getTime() / 1000;
-        };
+    window.WPM.gameModes = {
+        IDLE: 0,
+        COUNTDOWN: 1,
+        PLAYING: 2,
+        COMPLETE: 3,
     };
-})();
 
-(function() {
-    'use strict';
+    window.WPM.Game = function() {
+        var that = this;
 
-    window.WPM = window.WPM || {};
+        var modes = window.WPM.gameModes;
 
-    window.WPM.Controller = function(clock, typeBox, keyboardLayoutRenderer) {
+        var mode;
+        var startTime;
+        var timer;
+
         var wordsToType;
         var correctlyTyped;
         var incorrectlyTyped;
         var notYetTyped;
-        var startTime;
-
-        var isActive = false;
-        var timer;
-
-        var histogram;
         var incorrectCount;
 
-        function calculateHistogram() {
-            var endTime = clock.time();
+        function currentMode() {
+            var now = $.now();
 
-            var avgHistogram = [];
-            for (var i = ~~startTime; i < endTime; i++) {
-                var chars = 0;
-                var count = 5;
-                for (var j = i - count + 1; j <= i; j++) {
-                    chars += histogram[j] || 0;
-                }
-
-                // WPM = CPS * 60 sec/min * 1/5 words/char, averaged over count
-                var wpm = chars * 60 / 5 / count;
-                avgHistogram.push(wpm);
+            if (startTime !== undefined && now < startTime) {
+                return modes.COUNTDOWN;
+            } else if (startTime !== undefined && now > startTime && notYetTyped !== undefined && notYetTyped.length > 0) {
+                return modes.PLAYING;
+            } else if (notYetTyped === '') {
+                return modes.COMPLETE;
             }
 
-            return avgHistogram;
+            return modes.IDLE;
         }
 
         function tick() {
-            var now = clock.time();
-
-            isActive = (startTime !== undefined && now > startTime && notYetTyped !== undefined && notYetTyped !== '');
-            var isCountdown = (startTime !== undefined && now < startTime);
-            var isCompleted = (!isCountdown && notYetTyped === '');
-
-            if (isCountdown) {
-                typeBox.renderCountdown(startTime - now);
-            } else if (isActive) {
-                typeBox.renderProgress(correctlyTyped, incorrectlyTyped, notYetTyped, now - startTime);
-            } else if (isCompleted) {
-                typeBox.renderCompleted(correctlyTyped, now - startTime, calculateHistogram(), incorrectCount);
-            } else {
-                typeBox.renderInitial();
-            }
-
-            if (isActive && incorrectlyTyped.length === 0) {
-                keyboardLayoutRenderer.renderNextKey(notYetTyped[0]);
-            } else {
-                keyboardLayoutRenderer.clearNextKey();
-            }
-
             clearInterval(timer);
             timer = undefined;
 
-            if (isCountdown || isActive) {
+            if (mode === modes.PLAYING || mode === modes.COMPLETE) {
+                var seconds = ($.now() - startTime) / 1000;
+                var characters = correctlyTyped.length;
+                var words = correctlyTyped.length / 5;
+                var wpm = words / (seconds / 60);
+                var accuracy = characters / (characters + incorrectCount) * 100;
+
+                $(that).trigger({
+                    type: 'scorechange.wpm',
+                    seconds: seconds,
+                    characters: characters,
+                    words: words,
+                    wpm: wpm,
+                    accuracy: accuracy,
+                });
+            }
+
+            var oldMode = mode;
+            mode = currentMode();
+
+            if (mode !== oldMode) {
+                $(that).trigger({
+                    type: 'modechange.wpm',
+                    mode: mode,
+                });
+            }
+
+            if (mode !== oldMode && mode === modes.PLAYING) {
+                $(that).trigger({
+                    type: 'textchange.wpm',
+                    correctlyTyped: correctlyTyped,
+                    incorrectlyTyped: incorrectlyTyped,
+                    notYetTyped: notYetTyped,
+                    nextLetter: notYetTyped[0],
+                    change: 0,
+                });
+            }
+
+            if (mode === modes.COUNTDOWN) {
+                $(that).trigger({
+                    type: 'countdown.wpm',
+                    countdown: (startTime - $.now()) / 1000,
+                });
+            }
+
+            if (mode === modes.COUNTDOWN || mode === modes.PLAYING) {
                 timer = setTimeout(tick, 100);
             }
         }
+
+        this.init = function() {
+            tick();
+        };
 
         this.start = function(words, timeout) {
             if (timeout === undefined) {
                 timeout = 0;
             }
 
+            startTime = $.now() + timeout * 1000;
+
             wordsToType = notYetTyped = words;
             correctlyTyped = incorrectlyTyped = '';
-            startTime = clock.time() + timeout;
-
-            histogram = {};
             incorrectCount = 0;
 
             tick();
         };
 
         this.letterTyped = function(letter) {
-            if (!isActive) {
+            if (mode !== modes.PLAYING) {
                 return;
             }
 
@@ -105,21 +123,28 @@
                 // Add a correct letter
                 correctlyTyped = correctlyTyped + letter;
                 notYetTyped = notYetTyped.substr(1);
-
-                // Record it in the histogram
-                var time = ~~clock.time();
-                histogram[time] = (histogram[time] || 0) + 1;
             } else if (incorrectlyTyped.length <= 10) {
                 // Add an incorrect letter
                 incorrectlyTyped = incorrectlyTyped + letter;
                 incorrectCount++;
+            } else {
+                return;
             }
+
+            $(that).trigger({
+                type: 'textchange.wpm',
+                correctlyTyped: correctlyTyped,
+                incorrectlyTyped: incorrectlyTyped,
+                notYetTyped: notYetTyped,
+                nextLetter: incorrectlyTyped ? false : notYetTyped[0],
+                change: 1,
+            });
 
             tick();
         };
 
         this.backspaceTyped = function() {
-            if (!isActive) {
+            if (mode !== modes.PLAYING) {
                 return;
             }
 
@@ -130,25 +155,32 @@
                 // Remove a correct letter
                 notYetTyped = correctlyTyped[correctlyTyped.length - 1] + notYetTyped;
                 correctlyTyped = correctlyTyped.substr(0, correctlyTyped.length - 1);
-
-                // Record it in the histogram
-                var time = ~~clock.time();
-                histogram[time] = (histogram[time] || 0) - 1;
+            } else {
+                return;
             }
+
+            $(that).trigger({
+                type: 'textchange.wpm',
+                correctlyTyped: correctlyTyped,
+                incorrectlyTyped: incorrectlyTyped,
+                notYetTyped: notYetTyped,
+                nextLetter: incorrectlyTyped ? false : notYetTyped[0],
+                change: -1,
+            });
 
             tick();
         };
-
-        tick();
     };
-})();
+})(jQuery);
 
 (function($) {
     'use strict';
 
     window.WPM = window.WPM || {};
 
-    window.WPM.Input = function(document, controller, mapQwertyToDvorakCheckbox, keyboardMapper) {
+    window.WPM.Input = function(document, keyboardMapper) {
+        var that = this;
+
         document.on('keydown', function(e) {
             // Ignore keyboard shortcuts
             if (e.altKey || e.ctrlKey || e.metaKey) {
@@ -157,7 +189,10 @@
 
             // Backspace
             if (e.keyCode === 8) {
-                controller.backspaceTyped();
+                $(that).trigger({
+                    type: 'backspacepress.wpm',
+                });
+
                 return false;
             }
         });
@@ -166,80 +201,16 @@
             // Normal keys
             var letter = keyboardMapper.fromCharCode(e.charCode);
             if (letter) {
-                controller.letterTyped(letter);
+                $(that).trigger({
+                    type: 'letterpress.wpm',
+                    letter: letter,
+                });
+
                 return false;
             }
         });
-
-        mapQwertyToDvorakCheckbox.on('change', function() {
-            var mapName = $(this).is(':checked') ? 'qwertyToDvorak' : null;
-            keyboardMapper.changeMap(mapName);
-
-            $(this).blur();
-            return false;
-        });
     };
-})($);
-
-(function() {
-    'use strict';
-
-    window.WPM = window.WPM || {};
-
-    window.WPM.KeyboardLayoutsRenderer = function(qwertyContainer, dvorakContainer) {
-        var layouts = {
-            qwerty: [
-                ['Qq', 'Ww', 'Ee', 'Rr', 'Tt', 'Yy', 'Uu', 'Ii', 'Oo', 'Pp', '[{', ']}'],
-                ['Aa', 'Ss', 'Dd', 'Ff', 'Gg', 'Hh', 'Jj', 'Kk', 'Ll', ';:', '\'"'],
-                ['Zz', 'Xx', 'Cc', 'Vv', 'Bb', 'Nn', 'Mm', ',<', '.>', '/?'],
-            ],
-            dvorak: [
-                ['\'"', ',<', '.>', 'Pp', 'Yy', 'Ff', 'Gg', 'Cc', 'Rr', 'Ll', '/?', '=+'],
-                ['Aa', 'Oo', 'Ee', 'Uu', 'Ii', 'Dd', 'Hh', 'Tt', 'Nn', 'Ss', '-_'],
-                [';:', 'Qq', 'Jj', 'Kk', 'Xx', 'Bb', 'Mm', 'Ww', 'Vv', 'Zz'],
-            ],
-        };
-        var nextKey = null;
-
-        function renderLayout(container, layout) {
-            for (var i in layout) {
-                var row = $('<div class="row-' + i + '">');
-                for (var j = 0; j < layout[i].length; j++) {
-                    var key = $('<span class="key">')
-                        .text(layout[i][j][0])
-                        .toggleClass('home', i === 1 && (0 <= j && j <= 3 || 6 <= j && j <= 9))
-                        .toggleClass('bump', i === 1 && (j === 3 || j === 6))
-                        .appendTo(row);
-
-                    for (var k in layout[i][j]) {
-                        key.addClass('key-' + layout[i][j][k].charCodeAt());
-                    }
-                }
-                row.appendTo(container);
-            }
-        }
-
-        this.clearNextKey = function() {
-            qwertyContainer.find('.key.next').removeClass('next');
-            dvorakContainer.find('.key.next').removeClass('next');
-            nextKey = null;
-        };
-
-        this.renderNextKey = function(key) {
-            if (nextKey === key) {
-                return;
-            }
-
-            this.clearNextKey();
-            qwertyContainer.find('.key.key-' + key.charCodeAt()).addClass('next');
-            dvorakContainer.find('.key.key-' + key.charCodeAt()).addClass('next');
-            nextKey = key;
-        };
-
-        renderLayout(qwertyContainer, layouts.qwerty);
-        renderLayout(dvorakContainer, layouts.dvorak);
-    };
-})();
+})(jQuery);
 
 (function() {
     'use strict';
@@ -286,7 +257,75 @@
 
     window.WPM = window.WPM || {};
 
-    window.WPM.ParagraphSelector = function(paragraphs, container, controller) {
+    window.WPM.LayoutBox = function(qwertyContainer, dvorakContainer, mapQwertyToDvorakCheckbox) {
+        var that = this;
+
+        var layouts = {
+            qwerty: [
+                ['Qq', 'Ww', 'Ee', 'Rr', 'Tt', 'Yy', 'Uu', 'Ii', 'Oo', 'Pp', '[{', ']}'],
+                ['Aa', 'Ss', 'Dd', 'Ff', 'Gg', 'Hh', 'Jj', 'Kk', 'Ll', ';:', '\'"'],
+                ['Zz', 'Xx', 'Cc', 'Vv', 'Bb', 'Nn', 'Mm', ',<', '.>', '/?'],
+            ],
+            dvorak: [
+                ['\'"', ',<', '.>', 'Pp', 'Yy', 'Ff', 'Gg', 'Cc', 'Rr', 'Ll', '/?', '=+'],
+                ['Aa', 'Oo', 'Ee', 'Uu', 'Ii', 'Dd', 'Hh', 'Tt', 'Nn', 'Ss', '-_'],
+                [';:', 'Qq', 'Jj', 'Kk', 'Xx', 'Bb', 'Mm', 'Ww', 'Vv', 'Zz'],
+            ],
+        };
+
+        function renderLayout(container, layout) {
+            for (var i in layout) {
+                var row = $('<div class="row-' + i + '">');
+                for (var j = 0; j < layout[i].length; j++) {
+                    var key = $('<span class="key">')
+                        .text(layout[i][j][0])
+                        .toggleClass('home', i === 1 && (0 <= j && j <= 3 || 6 <= j && j <= 9))
+                        .toggleClass('bump', i === 1 && (j === 3 || j === 6))
+                        .appendTo(row);
+
+                    for (var k in layout[i][j]) {
+                        key.addClass('key-' + layout[i][j][k].charCodeAt());
+                    }
+                }
+                row.appendTo(container);
+            }
+        }
+
+        this.textChanged = function(e) {
+            qwertyContainer.find('.key.next').removeClass('next');
+            dvorakContainer.find('.key.next').removeClass('next');
+
+            if (e.nextLetter) {
+                qwertyContainer.find('.key.key-' + e.nextLetter.charCodeAt()).addClass('next');
+                dvorakContainer.find('.key.key-' + e.nextLetter.charCodeAt()).addClass('next');
+            }
+        };
+
+        mapQwertyToDvorakCheckbox.on('change', function() {
+            var mapName = $(this).is(':checked') ? 'qwertyToDvorak' : null;
+
+            $(that).trigger({
+                type: 'layoutchange.wpm',
+                mapName: mapName,
+            });
+
+            $(this).blur();
+            return false;
+        });
+
+        renderLayout(qwertyContainer, layouts.qwerty);
+        renderLayout(dvorakContainer, layouts.dvorak);
+    };
+})(jQuery);
+
+(function($) {
+    'use strict';
+
+    window.WPM = window.WPM || {};
+
+    window.WPM.ParaBox = function(paragraphs, container) {
+        var that = this;
+
         function shuffle(arr) {
             var temp, j, i = arr.length;
             while (--i) {
@@ -322,101 +361,49 @@
                 paragraph = paragraph.split(' ').slice(0, limit).join(' ');
             }
 
-            controller.start(paragraph, 3);
+            $(that).trigger({
+                type: 'paragraphchange.wpm',
+                paragraph: paragraph,
+            });
 
             container.find('li a.active').removeClass('active');
             $(this).addClass('active').blur();
             return false;
         });
     };
-})($);
+})(jQuery);
 
-/* global Chartist: false */
 /* global vex: false */
-(function($, Chartist, vex) {
+/* global Chartist: false */
+(function($, vex, Chartist) {
     'use strict';
 
     window.WPM = window.WPM || {};
 
-    window.WPM.TypeBox = function(type, stats) {
-        function renderTextAndStats(correctlyTyped, incorrectlyTyped, notYetTyped, seconds) {
-            var remaining = notYetTyped.substr(incorrectlyTyped.length);
-            type.find('.correct').text(correctlyTyped);
-            type.find('.incorrect').text(incorrectlyTyped);
-            type.find('.remaining').text(remaining);
+    vex.defaultOptions.className = 'vex-theme-default';
 
-            var characters = correctlyTyped.length;
-            var words = correctlyTyped.length / 5;
-            var wpm = words / (seconds / 60);
+    window.WPM.ScoreCard = function() {
+        var modes = window.WPM.gameModes;
 
-            renderStats(
-                wpm ? ~~wpm : 0,
-                characters,
-                ~~words,
-                seconds
-            );
-        }
+        var startTime;
+        var cpsLog;
+        var wpmLog;
 
-        function renderStats(wpm, characters, words, seconds) {
-            var time;
-            if (seconds !== undefined) {
-                var min = ~~(seconds / 60);
-                var sec = ~~(seconds - min * 60);
-                time = min + ':' + (sec < 10 ? '0' + sec : sec);
+        var wpmAverage;
+        var wpmMax;
+        var accuracy;
+
+        this.modeChanged = function(e) {
+            if (e.mode === modes.PLAYING) {
+                startTime = $.now();
+                cpsLog = {};
+                wpmLog = {};
+                wpmAverage = wpmMax = accuracy = 0;
             }
 
-            stats.find('.wpm .value').text(wpm !== undefined ? wpm : '--');
-            stats.find('.wpm-meter meter').val(isFinite(wpm) ? wpm : 0);
-            stats.find('.characters .value').text(characters !== undefined ? characters : '--');
-            stats.find('.words .value').text(words !== undefined ? words : '--');
-            stats.find('.time .value').text(time !== undefined ? time : '-:--');
-        }
-
-        this.renderInitial = function () {
-            if (type.data('mode') !== 'initial') {
-                type.data('mode', 'initial');
-                type.html('<div class="overlay">Select a paragraph from above</div>');
-                type.removeClass('completed');
+            if (e.mode !== modes.COMPLETE) {
+                return;
             }
-
-            renderStats();
-        };
-
-        this.renderCountdown = function (seconds) {
-            if (type.data('mode') !== 'countdown') {
-                type.data('mode', 'countdown');
-                type.html('<div class="overlay"></div>');
-                type.removeClass('completed');
-            }
-
-            type.find('.overlay').text('- ' + Math.ceil(seconds) + ' -');
-
-            renderTextAndStats('', '', '', 0);
-        };
-
-        this.renderProgress = function(correctlyTyped, incorrectlyTyped, notYetTyped, seconds) {
-            if (type.data('mode') !== 'progress') {
-                type.data('mode', 'progress');
-                type.html(
-                    '<span class="correct"></span>' +
-                    '<span class="incorrect"></span>' +
-                    '<span class="cursor"></span>' +
-                    '<span class="remaining"></span>'
-                );
-                type.removeClass('completed');
-            }
-
-            renderTextAndStats(correctlyTyped, incorrectlyTyped, notYetTyped, seconds);
-        };
-
-        this.renderCompleted = function(correctlyTyped, seconds, histogram, incorrect) {
-            if (type.data('mode') !== 'completed') {
-                type.data('mode', 'completed');
-                type.html('<span class="correct"></span>');
-                type.addClass('completed');
-            }
-
-            renderTextAndStats(correctlyTyped, '', '', seconds);
 
             var score = vex.open({});
 
@@ -424,9 +411,20 @@
 
             var chart = $('<div class="ct-chart">').appendTo(score);
 
+            var times = [];
+            var cpsHistogram = [];
+            var wpmHistogram = [];
+
+            var endTime = ~~($.now() / 1000);
+            for (var time = ~~(startTime / 1000); time < endTime; time++) {
+                times.push(time);
+                cpsHistogram.push(cpsLog[time] || 0);
+                wpmHistogram.push(wpmLog[time] || 0);
+            }
+
             new Chartist.Line(chart.get(0), {
-                labels: Object.keys(histogram),
-                series: [histogram],
+                labels: times,
+                series: [cpsHistogram, wpmHistogram],
             }, {
                 showArea: true,
                 showPoint: false,
@@ -437,26 +435,113 @@
                 },
             });
 
-            var accuracy = correctlyTyped.length / (correctlyTyped.length + incorrect) * 100;
-            var wpm = (correctlyTyped.length / 5) / (seconds / 60);
-
-            var max = 0;
-            for (var val in histogram) {
-                max = Math.max(max, histogram[val]);
-            }
-
             var dl = $('<dl class="dl-horizontal">').appendTo(score);
             $('<dt>').text('Average WPM:').appendTo(dl);
-            $('<dd>').text(~~wpm).appendTo(dl);
+            $('<dd>').text(~~wpmAverage).appendTo(dl);
             $('<dt>').text('Maximum WPM:').appendTo(dl);
-            $('<dd>').text(~~max).appendTo(dl);
+            $('<dd>').text(~~wpmMax).appendTo(dl);
             $('<dt>').text('Accuracy:').appendTo(dl);
             $('<dd>').text(~~accuracy + '%').appendTo(dl);
         };
-    };
 
-    vex.defaultOptions.className = 'vex-theme-default';
-})($, Chartist, vex);
+        this.textChanged = function(e) {
+            var now = ~~(e.timeStamp / 1000);
+            var wpm = e.change * 60 / 5;
+            cpsLog[now] = (cpsLog[now] || 0) + wpm;
+        };
+
+        this.scoreChanged = function(e) {
+            var now = ~~(e.timeStamp / 1000);
+            wpmLog[now] = e.wpm;
+            wpmAverage = e.wpm;
+            wpmMax = Math.max(wpmMax, e.wpm);
+            accuracy = e.accuracy;
+        };
+    };
+})($, vex, Chartist);
+
+(function() {
+    'use strict';
+
+    window.WPM = window.WPM || {};
+
+    window.WPM.StatsBox = function(stats) {
+        var modes = window.WPM.gameModes;
+
+        this.modeChanged = function(e) {
+            if (e.mode === modes.COUNTDOWN || e.mode === modes.IDLE) {
+                stats.find('.wpm .value').text('--');
+                stats.find('.wpm-meter meter').val(0);
+                stats.find('.characters .value').text('--');
+                stats.find('.words .value').text('--');
+                stats.find('.time .value').text('-:--');
+            } else if (e.mode === modes.PLAYING) {
+                stats.find('.wpm .value').text(0);
+                stats.find('.wpm-meter meter').val(0);
+                stats.find('.characters .value').text(0);
+                stats.find('.words .value').text(0);
+                stats.find('.time .value').text('0:00');
+            }
+        };
+
+        this.scoreChanged = function(e) {
+            var time;
+            if (e.seconds !== undefined) {
+                var min = ~~(e.seconds / 60);
+                var sec = ~~(e.seconds - min * 60);
+                time = min + ':' + (sec < 10 ? '0' + sec : sec);
+            }
+
+            stats.find('.wpm .value').text(~~e.wpm);
+            stats.find('.wpm-meter meter').val(isFinite(e.wpm) ? e.wpm : 0);
+            stats.find('.characters .value').text(e.characters);
+            stats.find('.words .value').text(~~e.words);
+            stats.find('.time .value').text(time);
+        };
+    };
+})();
+
+(function() {
+    'use strict';
+
+    window.WPM = window.WPM || {};
+
+    window.WPM.TypeBox = function(type) {
+        var modes = window.WPM.gameModes;
+
+        this.modeChanged = function(e) {
+            if (e.mode === modes.IDLE) {
+                type.html('<div class="overlay">Select a paragraph from above</div>');
+            } else if (e.mode === modes.COUNTDOWN) {
+                type.html('<div class="overlay"></div>');
+            } else if (e.mode === modes.PLAYING) {
+                type.html(
+                    '<span class="correct"></span>' +
+                    '<span class="incorrect"></span>' +
+                    '<span class="cursor"></span>' +
+                    '<span class="remaining"></span>'
+                );
+            } else if (e.mode === modes.COMPLETE) {
+                type.find('.incorrect').remove();
+                type.find('.cursor').remove();
+                type.find('.remaining').remove();
+            }
+
+            type.toggleClass('completed', e.mode === modes.COMPLETE);
+        };
+
+        this.countdown = function(e) {
+            type.find('.overlay').text('- ' + Math.ceil(e.countdown) + ' -');
+        };
+
+        this.textChanged = function(e) {
+            var remaining = e.notYetTyped.substr(e.incorrectlyTyped.length);
+            type.find('.correct').text(e.correctlyTyped);
+            type.find('.incorrect').text(e.incorrectlyTyped);
+            type.find('.remaining').text(remaining);
+        };
+    };
+})();
 
 (function() {
     "use strict";
@@ -505,32 +590,50 @@
     ];
 })();
 
-/**
- * Copyright (C) 2015 Doug Sheffer <desheffer@gmail.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 /* global WPM */
 (function($) {
     'use strict';
 
-    var clock = new WPM.Clock();
-    var typeBox = new WPM.TypeBox($('#type'), $('#stats'));
-    var keyboardLayoutsRenderer = new WPM.KeyboardLayoutsRenderer($('#qwerty-layout'), $('#dvorak-layout'));
+    // Game
+    var game = new WPM.Game();
+
+    // Input
     var keyboardMapper = new WPM.KeyboardMapper();
 
-    var controller = new WPM.Controller(clock, typeBox, keyboardLayoutsRenderer);
-    new WPM.ParagraphSelector(WPM.paragraphs, $('#paragraphs'), controller);
-    new WPM.Input($(document), controller, $('#map-qwerty-to-dvorak'), keyboardMapper);
-})($);
+    var input = new WPM.Input($(document), keyboardMapper);
+    $(input).on('letterpress.wpm', function(e) {
+        game.letterTyped(e.letter);
+    });
+    $(input).on('backspacepress.wpm', function() {
+        game.backspaceTyped();
+    });
+
+    // Views
+    var paraBox = new WPM.ParaBox(WPM.paragraphs, $('#paragraphs'));
+    $(paraBox).on('paragraphchange.wpm', function(e) {
+        game.start(e.paragraph, 3);
+    });
+
+    var typeBox = new WPM.TypeBox($('#type'));
+    $(game).on('modechange.wpm', typeBox.modeChanged);
+    $(game).on('countdown.wpm', typeBox.countdown);
+    $(game).on('textchange.wpm', typeBox.textChanged);
+
+    var statsBox = new WPM.StatsBox($('#stats'));
+    $(game).on('modechange.wpm', statsBox.modeChanged);
+    $(game).on('scorechange.wpm', statsBox.scoreChanged);
+
+    var layoutBox = new WPM.LayoutBox($('#qwerty-layout'), $('#dvorak-layout'), $('#map-qwerty-to-dvorak'));
+    $(game).on('textchange.wpm', layoutBox.textChanged);
+    $(layoutBox).on('layoutchange.wpm', function (e) {
+        keyboardMapper.changeMap(e.mapName);
+    });
+
+    var scoreCard = new WPM.ScoreCard();
+    $(game).on('modechange.wpm', scoreCard.modeChanged);
+    $(game).on('textchange.wpm', scoreCard.textChanged);
+    $(game).on('scorechange.wpm', scoreCard.scoreChanged);
+
+    // Start the game loop
+    game.init();
+})(jQuery);

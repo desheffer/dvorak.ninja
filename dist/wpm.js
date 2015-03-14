@@ -274,7 +274,7 @@
         };
 
         function renderLayout(container, layout) {
-            for (var i in layout) {
+            for (var i = 0; i < layout.length; i++) {
                 var row = $('<div class="row-' + i + '">');
                 for (var j = 0; j < layout[i].length; j++) {
                     var key = $('<span class="key">')

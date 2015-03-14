@@ -43,6 +43,7 @@
 
             $(that).trigger({
                 type: 'paragraphchange.wpm',
+                name: $(this).text(),
                 paragraph: paragraph,
             });
 

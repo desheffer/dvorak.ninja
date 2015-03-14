@@ -19,24 +19,24 @@
     'use strict';
 
     // Game
-
     var game = new WPM.Game();
 
     // Input
-
     var keyboardMapper = new WPM.KeyboardMapper();
 
-    new WPM.Input($(document), game, $('#map-qwerty-to-dvorak'), keyboardMapper);
-    // @TODO
-    // var input = new WPM.Input($(document), keyboardMapper);
-    // $(input).on('letterpress', game.letterPressed);
-    // $(input).on('backspacepress', game.backspacePressed);
+    var input = new WPM.Input($(document), keyboardMapper);
+    $(input).on('letterpress.wpm', function(e) {
+        game.letterTyped(e.letter);
+    });
+    $(input).on('backspacepress.wpm', function() {
+        game.backspaceTyped();
+    });
 
     // Views
-
-    new WPM.ParaBox(WPM.paragraphs, $('#paragraphs'), game);
-    // @TODO
-    // var paraBox = new WPM.ParaBox($('#para-box'), WPM.paragraphs);
+    var paraBox = new WPM.ParaBox(WPM.paragraphs, $('#paragraphs'), game);
+    $(paraBox).on('paragraphchange.wpm', function(e) {
+        game.start(e.paragraph, 3);
+    });
 
     var typeBox = new WPM.TypeBox($('#type'));
     $(game).on('modechange.wpm', typeBox.modeChanged);
@@ -47,20 +47,17 @@
     $(game).on('modechange.wpm', statsBox.modeChanged);
     $(game).on('scorechange.wpm', statsBox.scoreChanged);
 
-    var layoutBox = new WPM.LayoutBox($('#qwerty-layout'), $('#dvorak-layout'));
+    var layoutBox = new WPM.LayoutBox($('#qwerty-layout'), $('#dvorak-layout'), $('#map-qwerty-to-dvorak'));
     $(game).on('textchange.wpm', layoutBox.textChanged);
-    // @TODO
-    // $(layoutBox).on('layoutchange', keyboardMapper.layoutChanged);
+    $(layoutBox).on('layoutchange.wpm', function (e) {
+        keyboardMapper.changeMap(e.mapName);
+    });
 
     var scoreCard = new WPM.ScoreCard();
     $(game).on('modechange.wpm', scoreCard.modeChanged);
     $(game).on('textchange.wpm', scoreCard.textChanged);
     $(game).on('scorechange.wpm', scoreCard.scoreChanged);
 
-    // Debug
-    $(game).on('modechange.wpm', function(e) { console.log(e); });
-    $(game).on('textchange.wpm', function(e) { console.log(e); });
-    $(game).on('scorechange.wpm', function(e) { console.log(e); });
-
+    // Start the game loop
     game.init();
 })($);

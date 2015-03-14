@@ -3,7 +3,9 @@
 
     window.WPM = window.WPM || {};
 
-    window.WPM.LayoutBox = function(qwertyContainer, dvorakContainer) {
+    window.WPM.LayoutBox = function(qwertyContainer, dvorakContainer, mapQwertyToDvorakCheckbox) {
+        var that = this;
+
         var layouts = {
             qwerty: [
                 ['Qq', 'Ww', 'Ee', 'Rr', 'Tt', 'Yy', 'Uu', 'Ii', 'Oo', 'Pp', '[{', ']}'],
@@ -44,6 +46,18 @@
                 dvorakContainer.find('.key.key-' + e.nextLetter.charCodeAt()).addClass('next');
             }
         };
+
+        mapQwertyToDvorakCheckbox.on('change', function() {
+            var mapName = $(this).is(':checked') ? 'qwertyToDvorak' : null;
+
+            $(that).trigger({
+                type: 'layoutchange.wpm',
+                mapName: mapName,
+            });
+
+            $(this).blur();
+            return false;
+        });
 
         renderLayout(qwertyContainer, layouts.qwerty);
         renderLayout(dvorakContainer, layouts.dvorak);

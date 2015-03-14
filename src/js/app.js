@@ -17,17 +17,17 @@
     });
 
     // Views
-    var paraBox = new WPM.ParaBox(WPM.paragraphs, $('#paragraphs'));
+    var paraBox = new WPM.ParaBox(WPM.paragraphs, $('#para-box'));
     $(paraBox).on('paragraphchange.wpm', function(e) {
         game.start(e.name, e.paragraph, 3);
     });
 
-    var typeBox = new WPM.TypeBox($('#type'));
+    var typeBox = new WPM.TypeBox($('#type-box'));
     $(game).on('modechange.wpm', typeBox.modeChanged);
     $(game).on('countdown.wpm', typeBox.countdown);
     $(game).on('textchange.wpm', typeBox.textChanged);
 
-    var statsBox = new WPM.StatsBox($('#stats'));
+    var statsBox = new WPM.StatsBox($('#stats-box'));
     $(game).on('modechange.wpm', statsBox.modeChanged);
     $(game).on('scorechange.wpm', statsBox.scoreChanged);
 
@@ -43,7 +43,7 @@
     $(game).on('textchange.wpm', scoreCard.textChanged);
     $(game).on('scorechange.wpm', scoreCard.scoreChanged);
 
-    var socialBox = new WPM.SocialBox();
+    var socialBox = new WPM.SocialBox($('#social-box'));
     $(game).on('scorechange.wpm', socialBox.scoreChanged);
 
     // Start the game loop

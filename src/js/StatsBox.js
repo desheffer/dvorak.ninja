@@ -27,7 +27,7 @@
             if (e.seconds !== undefined) {
                 var min = ~~(e.seconds / 60);
                 var sec = ~~(e.seconds - min * 60);
-                time = min + ':' + (sec < 10 ? '0' + sec : sec);
+                time = min + ':' + ('0' + sec).substr(-2);
             }
 
             stats.find('.wpm .value').text(~~e.wpm);

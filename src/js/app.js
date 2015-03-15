@@ -26,6 +26,7 @@
     $(game).on('modechange.wpm', typeBox.modeChanged);
     $(game).on('countdown.wpm', typeBox.countdown);
     $(game).on('textchange.wpm', typeBox.textChanged);
+    $(game).on('scorechange.wpm', typeBox.scoreChanged);
 
     var statsBox = new WPM.StatsBox($('#stats-box'));
     $(game).on('modechange.wpm', statsBox.modeChanged);

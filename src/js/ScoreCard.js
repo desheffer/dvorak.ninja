@@ -23,6 +23,7 @@
 
             var chart = $('<div class="ct-chart">').appendTo(score);
 
+            // @TODO: These values are now provided by the scorechange event.
             var times = [];
             var cpsHistogram = [];
             var wpmHistogram = [];

@@ -26,6 +26,8 @@
         var notYetTyped;
         var incorrectCount;
 
+        var times;
+
         function currentMode() {
             var now = $.now();
 
@@ -62,6 +64,7 @@
                     wpm: wpm,
                     accuracy: accuracy,
                     paragraphName: paragraphName,
+                    times: times,
                     complete: mode !== modes.PLAYING,
                 });
             }
@@ -113,6 +116,7 @@
             wordsToType = notYetTyped = words;
             correctlyTyped = incorrectlyTyped = '';
             incorrectCount = 0;
+            times = [];
 
             tick();
         };
@@ -130,6 +134,14 @@
                 correctlyTyped = correctlyTyped + letter;
                 notYetTyped = notYetTyped.substr(1);
                 delta = 1;
+
+                var lastLetterTime = times.length > 0 ? times[times.length - 1].time : startTime;
+                var newLetterTime = $.now();
+                times.push({
+                    letter: letter,
+                    time: newLetterTime,
+                    duration: newLetterTime - lastLetterTime,
+                });
             } else if (incorrectlyTyped.length <= 10) {
                 // Add an incorrect letter
                 incorrectlyTyped = incorrectlyTyped + letter;
@@ -165,6 +177,8 @@
                 notYetTyped = correctlyTyped[correctlyTyped.length - 1] + notYetTyped;
                 correctlyTyped = correctlyTyped.substr(0, correctlyTyped.length - 1);
                 delta = -1;
+
+                times.pop();
             } else {
                 return;
             }

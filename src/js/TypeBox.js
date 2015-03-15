@@ -18,10 +18,6 @@
                     '<span class="cursor"></span>' +
                     '<span class="remaining"></span>'
                 );
-            } else if (e.mode === modes.COMPLETE) {
-                type.find('.incorrect').remove();
-                type.find('.cursor').remove();
-                type.find('.remaining').remove();
             }
 
             type.toggleClass('completed', e.mode === modes.COMPLETE);
@@ -36,6 +32,31 @@
             type.find('.correct').text(e.correctlyTyped);
             type.find('.incorrect').text(e.incorrectlyTyped);
             type.find('.remaining').text(remaining);
+        };
+
+        this.scoreChanged = function(e) {
+            if (!e.complete) {
+                return;
+            }
+
+            type.html('<span class="results"></span>');
+            var results = type.find('.results');
+
+            var min, max;
+            min = max = e.times[0].duration;
+
+            for (var time in e.times) {
+                min = Math.min(min, e.times[time].duration);
+                max = Math.max(max, e.times[time].duration);
+            }
+
+            for (time in e.times) {
+                var alpha = (e.times[time].duration - min) / (max - min);
+                $('<span class="letter">')
+                    .text(e.times[time].letter)
+                    .css('background-color', 'rgba(255, 0, 0, ' + alpha + ')')
+                    .appendTo(results);
+            }
         };
     };
 })();

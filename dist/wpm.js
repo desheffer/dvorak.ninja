@@ -1,4 +1,4 @@
-/*! wpm 2015-03-14 */
+/*! wpm 2015-03-15 */
 (function($) {
     'use strict';
 
@@ -26,6 +26,8 @@
         var incorrectlyTyped;
         var notYetTyped;
         var incorrectCount;
+
+        var times;
 
         function currentMode() {
             var now = $.now();
@@ -63,6 +65,7 @@
                     wpm: wpm,
                     accuracy: accuracy,
                     paragraphName: paragraphName,
+                    times: times,
                     complete: mode !== modes.PLAYING,
                 });
             }
@@ -114,6 +117,7 @@
             wordsToType = notYetTyped = words;
             correctlyTyped = incorrectlyTyped = '';
             incorrectCount = 0;
+            times = [];
 
             tick();
         };
@@ -131,6 +135,14 @@
                 correctlyTyped = correctlyTyped + letter;
                 notYetTyped = notYetTyped.substr(1);
                 delta = 1;
+
+                var lastLetterTime = times.length > 0 ? times[times.length - 1].time : startTime;
+                var newLetterTime = $.now();
+                times.push({
+                    letter: letter,
+                    time: newLetterTime,
+                    duration: newLetterTime - lastLetterTime,
+                });
             } else if (incorrectlyTyped.length <= 10) {
                 // Add an incorrect letter
                 incorrectlyTyped = incorrectlyTyped + letter;
@@ -166,6 +178,8 @@
                 notYetTyped = correctlyTyped[correctlyTyped.length - 1] + notYetTyped;
                 correctlyTyped = correctlyTyped.substr(0, correctlyTyped.length - 1);
                 delta = -1;
+
+                times.pop();
             } else {
                 return;
             }
@@ -415,6 +429,7 @@
 
             var chart = $('<div class="ct-chart">').appendTo(score);
 
+            // @TODO: These values are now provided by the scorechange event.
             var times = [];
             var cpsHistogram = [];
             var wpmHistogram = [];
@@ -605,10 +620,6 @@
                     '<span class="cursor"></span>' +
                     '<span class="remaining"></span>'
                 );
-            } else if (e.mode === modes.COMPLETE) {
-                type.find('.incorrect').remove();
-                type.find('.cursor').remove();
-                type.find('.remaining').remove();
             }
 
             type.toggleClass('completed', e.mode === modes.COMPLETE);
@@ -623,6 +634,31 @@
             type.find('.correct').text(e.correctlyTyped);
             type.find('.incorrect').text(e.incorrectlyTyped);
             type.find('.remaining').text(remaining);
+        };
+
+        this.scoreChanged = function(e) {
+            if (!e.complete) {
+                return;
+            }
+
+            type.html('<span class="results"></span>');
+            var results = type.find('.results');
+
+            var min, max;
+            min = max = e.times[0].duration;
+
+            for (var time in e.times) {
+                min = Math.min(min, e.times[time].duration);
+                max = Math.max(max, e.times[time].duration);
+            }
+
+            for (time in e.times) {
+                var alpha = (e.times[time].duration - min) / (max - min);
+                $('<span class="letter">')
+                    .text(e.times[time].letter)
+                    .css('background-color', 'rgba(255, 0, 0, ' + alpha + ')')
+                    .appendTo(results);
+            }
         };
     };
 })();
@@ -651,7 +687,7 @@
         },
         {
             name: "Dvorak 3 [cfklmprv]",
-            text: "partitions inked visit months scammed hoorahs epics internship fondu milks carousals honorific ducts stilled concretes avatars speller enslave moderns pictured preponderate freeholders smirks missions litter retardation printer turned radius antihistamine forth patches transcendentalist interlink ruffs admiration satisfaction financial pauses ecstasies moochers sheller pioneered maidenheads accommodate refresh counterpoints platformed riddle aortas purloin occult merchantmen complainers patchier penlites clasps recoup continue rookie stuffed dipsomania footloose muralists unloved trickiest savvied minefields mainland coifed attempt uniform seventeens roasted technicians corsair stalemate terraria impulses scuds preparation tinier cattail limpet overeaten niter trammelled investiture administrators interstates carpets officious aseptic illusive mentored upend repeater commandoes middle reverenced",
+            text: "partitions inked visit months scammed hoorahs epics internship fondu milks carousals honorific ducts stilled concretes avatars speller enslave moderns pictured preponderate freeholders smirks missions litter tradesmen printer turned radius antihistamine forth patches transcendentalist interlink ruffs admiration satisfaction financial pauses ecstasies moochers sheller pioneered maidenheads accommodate refresh counterpoints platformed riddle aortas purloin occult merchantmen complainers patchier penlites clasps recoup continue rookie stuffed dipsomania footloose muralists unloved trickiest savvied minefields mainland coifed attempt uniform seventeens roasted technicians corsair stalemate terraria impulses scuds preparation tinier cattail limpet overeaten niter trammelled investiture administrators interstates carpets officious aseptic illusive mentored upend repeater commandoes middle reverenced",
             shuffle: true,
             limit: 50,
         },
@@ -706,6 +742,7 @@
     $(game).on('modechange.wpm', typeBox.modeChanged);
     $(game).on('countdown.wpm', typeBox.countdown);
     $(game).on('textchange.wpm', typeBox.textChanged);
+    $(game).on('scorechange.wpm', typeBox.scoreChanged);
 
     var statsBox = new WPM.StatsBox($('#stats-box'));
     $(game).on('modechange.wpm', statsBox.modeChanged);

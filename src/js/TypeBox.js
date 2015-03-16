@@ -51,10 +51,10 @@
             }
 
             for (time in e.times) {
-                var alpha = (e.times[time].duration - min) / (max - min);
+                var percent = (e.times[time].duration - min) / (max - min);
                 $('<span class="letter">')
                     .text(e.times[time].letter)
-                    .css('background-color', 'rgba(255, 0, 0, ' + alpha + ')')
+                    .css('background-color', 'rgba(217, 83, 79, ' + percent + ')')
                     .appendTo(results);
             }
         };

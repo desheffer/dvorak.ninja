@@ -3,8 +3,6 @@
 
     window.WPM = window.WPM || {};
 
-    window.vex.defaultOptions.className = "vex-theme-default";
-
     window.WPM.firebaseURL = "http://wpm.firebaseio.com/";
 
     window.WPM.paragraphs = [

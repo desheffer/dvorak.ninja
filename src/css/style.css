@@ -19,22 +19,23 @@ meter::-webkit-meter-even-less-good-value {
     background: #d9534f;
     border-radius: 3px;
 }
-#type-box {
+.type {
     background-color: white;
     border: 1px solid #777;
-    font-family: Consolas, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
+}
+.type-box {
     font-size: 14pt;
     min-height: 15em;
     padding: 10px;
     position: relative;
     white-space: pre-wrap;
 }
-#type-box .overlay {
+.type-box .overlay {
     font-size: 32pt;
     margin-top: 2em;
     text-align: center;
 }
-#type-box .cursor {
+.type-box .cursor {
     animation: blink 1s steps(2, start) infinite;
     -moz-animation: blink 1s steps(2, start) infinite;
     -webkit-animation: blink 1s steps(2, start) infinite;
@@ -45,45 +46,54 @@ meter::-webkit-meter-even-less-good-value {
     position: absolute;
     width: 2px;
 }
-#type-box .correct {
+.type-box .correct {
     color: #ccc;
 }
-#type-box .incorrect {
+.type-box .incorrect {
     background-color: #d9534f;
     color: black;
 }
-#type-box .remaining {
+.type-box .remaining {
     color: #777;
 }
-#stats-box {
+.score-box {
+    /* display: none; */
+    background-color: #eee;
+    padding: 10px;
+    text-align: center;
+}
+.score-box.completed {
+    display: block;
+}
+.stats {
     background-color: #eee;
     border-radius: 0 0 10px 10px;
     padding-bottom: 1em;
     padding-top: 1em;
 }
-#stats-box .stat {
+.stats .stat {
     font-size: 10pt;
     font-weight: bold;
     text-align: center;
 }
-#stats-box .value {
+.stats .value {
     font-size: 14pt;
     text-align: center;
 }
-#stats-box .wpm-meter meter {
+.stats .wpm-meter meter {
     height: 1.5em;
     margin-top: 1.6em;
     width: 100%;
 }
-#para-box {
+.para {
     margin-top: 1em;
 }
-#para-box a {
+.para a {
     border-radius: 10px;
     padding: 0 0.5em;
     text-decoration: underline;
 }
-#para-box a.active {
+.para a.active {
     background-color: #eee;
     color: black;
     text-decoration: none;
@@ -124,7 +134,7 @@ meter::-webkit-meter-even-less-good-value {
     -webkit-transition-delay: 1s;
     transition-delay: 1s;
 }
-#social-box {
+.social {
     display: none; /* @TODO */
     background-color: white;
     bottom: 0;
@@ -133,14 +143,14 @@ meter::-webkit-meter-even-less-good-value {
     position: fixed;
     right: 0;
 }
-#social-box .avatar {
+.social .avatar {
     border: 1px solid #777;
     display: inline-block;
     height: 1em;
     margin-bottom: -0.1em;
     width: 1em;
 }
-#social-box .user-count {
+.social .user-count {
     text-align: right;
 }
 .vex-content {

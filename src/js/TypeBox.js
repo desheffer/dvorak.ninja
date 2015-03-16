@@ -51,10 +51,11 @@
             }
 
             for (time in e.times) {
-                var alpha = (e.times[time].duration - min) / (max - min);
+                var relative = (e.times[time].duration - min) / (max - min) * 2 - 1;
+                var color = relative > 0 ? 'rgba(217, 83, 79, ' + relative + ')' : 'rgba(92, 184, 92, ' + -relative + ')';
                 $('<span class="letter">')
                     .text(e.times[time].letter)
-                    .css('background-color', 'rgba(255, 0, 0, ' + alpha + ')')
+                    .css('background-color', color)
                     .appendTo(results);
             }
         };

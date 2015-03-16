@@ -30,19 +30,6 @@ module.exports = function(grunt) {
       },
     },
 
-    copy: {
-      dist: {
-        files: [{
-          expand: true,
-          cwd: 'bower_components/chartist/dist',
-          src: [
-            'chartist.min.js.map',
-          ],
-          dest: 'dist/',
-        }],
-      },
-    },
-
     concat: {
       css: {
         options: {
@@ -56,9 +43,6 @@ module.exports = function(grunt) {
       vendorcss: {
         src: [
           'bower_components/bootstrap/dist/css/bootstrap.min.css',
-          'bower_components/chartist/dist/chartist.min.css',
-          'bower_components/vex/css/vex.css',
-          'bower_components/vex/css/vex-theme-default.css',
         ],
         dest: 'dist/vendor.css',
       },
@@ -72,7 +56,6 @@ module.exports = function(grunt) {
           'src/js/KeyboardMapper.js',
           'src/js/LayoutBox.js',
           'src/js/ParaBox.js',
-          'src/js/ScoreCard.js',
           'src/js/SocialBox.js',
           'src/js/StatsBox.js',
           'src/js/TypeBox.js',
@@ -85,8 +68,6 @@ module.exports = function(grunt) {
         src: [
           'bower_components/jquery/dist/jquery.min.js',
           'bower_components/bootstrap/dist/js/bootstrap.min.js',
-          'bower_components/chartist/dist/chartist.min.js',
-          'bower_components/vex/js/vex.min.js',
           'bower_components/firebase/firebase.js',
         ],
         dest: 'dist/vendor.js',
@@ -123,7 +104,6 @@ module.exports = function(grunt) {
   grunt.registerTask('build', [
     'jshint',
     'clean',
-    'copy',
     'concat',
     'cssmin',
     'uglify',

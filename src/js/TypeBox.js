@@ -51,11 +51,10 @@
             }
 
             for (time in e.times) {
-                var relative = (e.times[time].duration - min) / (max - min) * 2 - 1;
-                var color = relative > 0 ? 'rgba(217, 83, 79, ' + relative + ')' : 'rgba(92, 184, 92, ' + -relative + ')';
+                var percent = (e.times[time].duration - min) / (max - min);
                 $('<span class="letter">')
                     .text(e.times[time].letter)
-                    .css('background-color', color)
+                    .css('background-color', 'rgba(217, 83, 79, ' + percent + ')')
                     .appendTo(results);
             }
         };

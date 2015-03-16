@@ -1,4 +1,4 @@
-/*! wpm 2015-03-15 */
+/*! wpm 2015-03-16 */
 (function($) {
     'use strict';
 
@@ -25,7 +25,7 @@
         var correctlyTyped;
         var incorrectlyTyped;
         var notYetTyped;
-        var incorrectCount;
+        var totalTyped;
 
         var times;
 
@@ -55,7 +55,7 @@
                 var characters = correctlyTyped.length;
                 var words = correctlyTyped.length / 5;
                 var wpm = words / (seconds / 60);
-                var accuracy = characters / (characters + incorrectCount) * 100;
+                var accuracy = characters / totalTyped * 100;
 
                 $(that).trigger({
                     type: 'scorechange.wpm',
@@ -116,7 +116,7 @@
             paragraphName = name;
             wordsToType = notYetTyped = words;
             correctlyTyped = incorrectlyTyped = '';
-            incorrectCount = 0;
+            totalTyped = 0;
             times = [];
 
             tick();
@@ -127,6 +127,7 @@
                 return;
             }
 
+            totalTyped++;
             var delta = 0;
             var expected = notYetTyped.substr(0, 1);
 
@@ -146,7 +147,6 @@
             } else if (incorrectlyTyped.length <= 10) {
                 // Add an incorrect letter
                 incorrectlyTyped = incorrectlyTyped + letter;
-                incorrectCount++;
             } else {
                 return;
             }
@@ -404,94 +404,6 @@
     };
 })(jQuery);
 
-/* global vex: false */
-/* global Chartist: false */
-(function($, vex, Chartist) {
-    'use strict';
-
-    window.WPM = window.WPM || {};
-
-    window.WPM.ScoreCard = function() {
-        var modes = window.WPM.gameModes;
-
-        var startTime;
-        var cpsLog;
-        var wpmLog;
-
-        var wpmAverage;
-        var wpmMax;
-        var accuracy;
-
-        function showScoreCard() {
-            var score = vex.open({});
-
-            $('<h2>').text('Score card').appendTo(score);
-
-            var chart = $('<div class="ct-chart">').appendTo(score);
-
-            // @TODO: These values are now provided by the scorechange event.
-            var times = [];
-            var cpsHistogram = [];
-            var wpmHistogram = [];
-
-            var endTime = ~~($.now() / 1000);
-            for (var time = ~~(startTime / 1000); time < endTime; time++) {
-                times.push(time);
-                cpsHistogram.push(cpsLog[time] || 0);
-                wpmHistogram.push(wpmLog[time] || 0);
-            }
-
-            new Chartist.Line(chart.get(0), {
-                labels: times,
-                series: [cpsHistogram, wpmHistogram],
-            }, {
-                showArea: true,
-                showPoint: false,
-                fullWidth: true,
-                axisX: {
-                    showLabel: false,
-                    showGrid: false,
-                },
-            });
-
-            var dl = $('<dl class="dl-horizontal">').appendTo(score);
-            $('<dt>').text('Average WPM:').appendTo(dl);
-            $('<dd>').text(~~wpmAverage).appendTo(dl);
-            $('<dt>').text('Maximum WPM:').appendTo(dl);
-            $('<dd>').text(~~wpmMax).appendTo(dl);
-            $('<dt>').text('Accuracy:').appendTo(dl);
-            $('<dd>').text(~~accuracy + '%').appendTo(dl);
-        }
-
-        this.modeChanged = function(e) {
-            if (e.mode === modes.PLAYING) {
-                startTime = $.now();
-                cpsLog = {};
-                wpmLog = {};
-                wpmAverage = wpmMax = accuracy = 0;
-            }
-        };
-
-        this.textChanged = function(e) {
-            var now = ~~(e.timeStamp / 1000);
-            var wpm = e.change * 60 / 5;
-            cpsLog[now] = (cpsLog[now] || 0) + wpm;
-        };
-
-        this.scoreChanged = function(e) {
-            var now = ~~(e.timeStamp / 1000);
-            wpmLog[now] = e.wpm;
-            wpmAverage = e.wpm;
-            wpmMax = Math.max(wpmMax, e.wpm);
-            accuracy = e.accuracy;
-
-            if (e.complete) {
-                showScoreCard();
-            }
-        };
-    };
-})($, vex, Chartist);
-
 /* global Firebase: false */
 (function($, Firebase) {
     'use strict';
@@ -569,17 +481,11 @@
 
         this.modeChanged = function(e) {
             if (e.mode === modes.COUNTDOWN || e.mode === modes.IDLE) {
-                stats.find('.wpm .value').text('--');
+                stats.find('.wpm .value').text('---');
                 stats.find('.wpm-meter meter').val(0);
-                stats.find('.characters .value').text('--');
-                stats.find('.words .value').text('--');
+                stats.find('.accuracy .value').text('---%');
+                stats.find('.characters .value').text('---');
                 stats.find('.time .value').text('-:--');
-            } else if (e.mode === modes.PLAYING) {
-                stats.find('.wpm .value').text(0);
-                stats.find('.wpm-meter meter').val(0);
-                stats.find('.characters .value').text(0);
-                stats.find('.words .value').text(0);
-                stats.find('.time .value').text('0:00');
             }
         };
 
@@ -593,8 +499,8 @@
 
             stats.find('.wpm .value').text(~~e.wpm);
             stats.find('.wpm-meter meter').val(isFinite(e.wpm) ? e.wpm : 0);
-            stats.find('.characters .value').text(e.characters);
-            stats.find('.words .value').text(~~e.words);
+            stats.find('.accuracy .value').text(~~e.accuracy + '%');
+            stats.find('.characters .value').text(~~e.characters);
             stats.find('.time .value').text(time);
         };
     };
@@ -653,10 +559,10 @@
             }
 
             for (time in e.times) {
-                var alpha = (e.times[time].duration - min) / (max - min);
+                var percent = (e.times[time].duration - min) / (max - min);
                 $('<span class="letter">')
                     .text(e.times[time].letter)
-                    .css('background-color', 'rgba(255, 0, 0, ' + alpha + ')')
+                    .css('background-color', 'rgba(217, 83, 79, ' + percent + ')')
                     .appendTo(results);
             }
         };
@@ -667,8 +573,6 @@
     "use strict";
 
     window.WPM = window.WPM || {};
-
-    window.vex.defaultOptions.className = "vex-theme-default";
 
     window.WPM.firebaseURL = "http://wpm.firebaseio.com/";
 
@@ -754,11 +658,6 @@
     $(layoutBox).on('layoutchange.wpm', function (e) {
         keyboardMapper.changeMap(e.mapName);
     });
-
-    var scoreCard = new WPM.ScoreCard();
-    $(game).on('modechange.wpm', scoreCard.modeChanged);
-    $(game).on('textchange.wpm', scoreCard.textChanged);
-    $(game).on('scorechange.wpm', scoreCard.scoreChanged);
 
     var socialBox = new WPM.SocialBox($('#social-box'));
     $(game).on('scorechange.wpm', socialBox.scoreChanged);

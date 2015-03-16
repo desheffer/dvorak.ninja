@@ -24,7 +24,7 @@
         var correctlyTyped;
         var incorrectlyTyped;
         var notYetTyped;
-        var incorrectCount;
+        var totalTyped;
 
         var times;
 
@@ -54,7 +54,7 @@
                 var characters = correctlyTyped.length;
                 var words = correctlyTyped.length / 5;
                 var wpm = words / (seconds / 60);
-                var accuracy = characters / (characters + incorrectCount) * 100;
+                var accuracy = characters / totalTyped * 100;
 
                 $(that).trigger({
                     type: 'scorechange.wpm',
@@ -115,7 +115,7 @@
             paragraphName = name;
             wordsToType = notYetTyped = words;
             correctlyTyped = incorrectlyTyped = '';
-            incorrectCount = 0;
+            totalTyped = 0;
             times = [];
 
             tick();
@@ -126,6 +126,7 @@
                 return;
             }
 
+            totalTyped++;
             var delta = 0;
             var expected = notYetTyped.substr(0, 1);
 
@@ -145,7 +146,6 @@
             } else if (incorrectlyTyped.length <= 10) {
                 // Add an incorrect letter
                 incorrectlyTyped = incorrectlyTyped + letter;
-                incorrectCount++;
             } else {
                 return;
             }

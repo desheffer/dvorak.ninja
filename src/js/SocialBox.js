@@ -76,7 +76,7 @@
                 $('<td>').text(date.toLocaleString()).appendTo(tr);
                 tr.prependTo(tbody);
 
-                tbody.slice(5).remove();
+                tbody.children().slice(5).remove();
             });
 
         this.scoreChanged = function(e) {

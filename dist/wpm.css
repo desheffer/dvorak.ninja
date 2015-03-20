@@ -1,4 +1,4 @@
-/*! wpm 2015-03-18 */
+/*! wpm 2015-03-20 */
 body {
     font-family: Consolas, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
     padding: 5em 0;
@@ -20,6 +20,9 @@ meter::-webkit-meter-even-less-good-value {
     background: #d9534f;
     border-radius: 3px;
 }
+#widget {
+    display: none;
+}
 .para {
     margin-top: 1em;
 }
@@ -39,7 +42,7 @@ meter::-webkit-meter-even-less-good-value {
 }
 .type-box {
     font-size: 14pt;
-    min-height: 15em;
+    min-height: 12em;
     padding: 10px;
     position: relative;
     white-space: pre-wrap;
@@ -69,6 +72,12 @@ meter::-webkit-meter-even-less-good-value {
 }
 .type-box .remaining {
     color: #777;
+}
+.score-box {
+    background-color: #d9edf7;
+    margin: 0.5em;
+    padding: 0.5em;
+    text-align: center;
 }
 .stats {
     background-color: #eee;

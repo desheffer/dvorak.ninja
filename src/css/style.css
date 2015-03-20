@@ -19,6 +19,9 @@ meter::-webkit-meter-even-less-good-value {
     background: #d9534f;
     border-radius: 3px;
 }
+#widget {
+    display: none;
+}
 .para {
     margin-top: 1em;
 }

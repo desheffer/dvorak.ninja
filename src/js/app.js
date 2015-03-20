@@ -44,4 +44,6 @@
 
     // Start the game loop
     game.init();
+
+    $('#widget').show();
 })(jQuery);

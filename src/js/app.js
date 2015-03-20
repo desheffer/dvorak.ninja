@@ -39,6 +39,10 @@
         keyboardMapper.changeMap(e.mapName);
     });
 
+    var scoreBox = new WPM.ScoreBox($('#score-box'));
+    $(game).on('modechange.wpm', scoreBox.modeChanged);
+    $(game).on('scorechange.wpm', scoreBox.scoreChanged);
+
     var socialBox = new WPM.SocialBox($('#social-box'));
     $(game).on('scorechange.wpm', socialBox.scoreChanged);
 

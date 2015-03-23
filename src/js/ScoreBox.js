@@ -45,9 +45,10 @@
 
         function missedLettersByFrequency(times) {
             var letters = {};
+            var letter;
 
             for (var i in times) {
-                var letter = times[i].letter;
+                letter = times[i].letter;
 
                 if (letters[letter] === undefined) {
                     letters[letter] = {

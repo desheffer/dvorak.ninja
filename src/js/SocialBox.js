@@ -72,7 +72,7 @@
                 $('<td>').text(~~val.score.accuracy + '%').appendTo(tr);
                 $('<td>').text(~~val.score.characters).appendTo(tr);
                 $('<td>').text(time).appendTo(tr);
-                $('<td>').text(val.paragraph.name).appendTo(tr);
+                $('<td>').text(val.wordSet.name).appendTo(tr);
                 $('<td>').text(date.toLocaleString()).appendTo(tr);
                 tr.prependTo(tbody);
 
@@ -89,8 +89,8 @@
                     name: hashToName(user.uid),
                 },
                 timestamp: e.timeStamp,
-                paragraph: {
-                    name: e.paragraphName,
+                wordSet: {
+                    name: e.wordSetName,
                 },
                 score: {
                     seconds: e.seconds,

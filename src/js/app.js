@@ -17,9 +17,9 @@
     });
 
     // Views
-    var paraBox = new WPM.ParaBox(WPM.paragraphs, $('#para-box'));
-    $(paraBox).on('paragraphchange.wpm', function(e) {
-        game.start(e.name, e.paragraph, 3);
+    var wordSetBox = new WPM.WordSetBox(WPM.wordSets, $('#word-set-box'));
+    $(wordSetBox).on('wordsetchange.wpm', function(e) {
+        game.start(e.name, e.wordSet, 3);
     });
 
     var typeBox = new WPM.TypeBox($('#type-box'));

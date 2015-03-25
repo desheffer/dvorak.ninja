@@ -19,7 +19,7 @@
         var startTime;
         var timer;
 
-        var paragraphName;
+        var wordSetName;
         var wordsToType;
         var correctlyTyped;
         var incorrectlyTyped;
@@ -63,7 +63,7 @@
                     words: words,
                     wpm: wpm,
                     accuracy: accuracy,
-                    paragraphName: paragraphName,
+                    wordSetName: wordSetName,
                     times: times,
                     complete: mode !== modes.PLAYING,
                 });
@@ -112,7 +112,7 @@
             mode = undefined;
             startTime = $.now() + timeout * 1000;
 
-            paragraphName = name;
+            wordSetName = name;
             wordsToType = notYetTyped = words;
             correctlyTyped = incorrectlyTyped = '';
             totalTyped = 0;

@@ -1,4 +1,4 @@
-/*! wpm 2015-03-23 */
+/*! wpm 2015-03-25 */
 (function($) {
     'use strict';
 
@@ -20,7 +20,7 @@
         var startTime;
         var timer;
 
-        var paragraphName;
+        var wordSetName;
         var wordsToType;
         var correctlyTyped;
         var incorrectlyTyped;
@@ -64,7 +64,7 @@
                     words: words,
                     wpm: wpm,
                     accuracy: accuracy,
-                    paragraphName: paragraphName,
+                    wordSetName: wordSetName,
                     times: times,
                     complete: mode !== modes.PLAYING,
                 });
@@ -113,7 +113,7 @@
             mode = undefined;
             startTime = $.now() + timeout * 1000;
 
-            paragraphName = name;
+            wordSetName = name;
             wordsToType = notYetTyped = words;
             correctlyTyped = incorrectlyTyped = '';
             totalTyped = 0;
@@ -348,62 +348,6 @@
     };
 })(jQuery);
 
-(function($) {
-    'use strict';
-
-    window.WPM = window.WPM || {};
-
-    window.WPM.ParaBox = function(paragraphs, container) {
-        var that = this;
-
-        function shuffle(arr) {
-            var temp, j, i = arr.length;
-            while (--i) {
-                j = ~~(Math.random() * (i + 1));
-                temp = arr[i];
-                arr[i] = arr[j];
-                arr[j] = temp;
-            }
-
-            return arr;
-        }
-
-        for (var i in paragraphs) {
-            var li = $('<li>');
-            $('<a class="paragraph" href="#">')
-                .text(paragraphs[i].name)
-                .data('paragraph', paragraphs[i].text)
-                .data('shuffle', paragraphs[i].shuffle === true)
-                .data('limit', paragraphs[i].limit)
-                .appendTo(li);
-            li.appendTo(container);
-        }
-
-        container.find('a.paragraph').on('click', function() {
-            var paragraph = $(this).data('paragraph');
-
-            if ($(this).data('shuffle') === true) {
-                paragraph = shuffle(paragraph.split(' ')).join(' ');
-            }
-
-            var limit = $(this).data('limit');
-            if (limit > 0) {
-                paragraph = paragraph.split(' ').slice(0, limit).join(' ');
-            }
-
-            $(that).trigger({
-                type: 'paragraphchange.wpm',
-                name: $(this).text(),
-                paragraph: paragraph,
-            });
-
-            container.find('li a.active').removeClass('active');
-            $(this).addClass('active').blur();
-            return false;
-        });
-    };
-})(jQuery);
-
 (function() {
     'use strict';
 
@@ -585,7 +529,7 @@
                 $('<td>').text(~~val.score.accuracy + '%').appendTo(tr);
                 $('<td>').text(~~val.score.characters).appendTo(tr);
                 $('<td>').text(time).appendTo(tr);
-                $('<td>').text(val.paragraph.name).appendTo(tr);
+                $('<td>').text(val.wordSet.name).appendTo(tr);
                 $('<td>').text(date.toLocaleString()).appendTo(tr);
                 tr.prependTo(tbody);
 
@@ -602,8 +546,8 @@
                     name: hashToName(user.uid),
                 },
                 timestamp: e.timeStamp,
-                paragraph: {
-                    name: e.paragraphName,
+                wordSet: {
+                    name: e.wordSetName,
                 },
                 score: {
                     seconds: e.seconds,
@@ -661,7 +605,7 @@
 
         this.modeChanged = function(e) {
             if (e.mode === modes.IDLE) {
-                type.html('<div class="overlay">Select a paragraph from above</div>');
+                type.html('<div class="overlay">Select a word set from above</div>');
             } else if (e.mode === modes.COUNTDOWN) {
                 type.html('<div class="overlay"></div>');
             } else if (e.mode === modes.PLAYING) {
@@ -714,6 +658,62 @@
     };
 })();
 
+(function($) {
+    'use strict';
+
+    window.WPM = window.WPM || {};
+
+    window.WPM.WordSetBox = function(wordSets, container) {
+        var that = this;
+
+        function shuffle(arr) {
+            var temp, j, i = arr.length;
+            while (--i) {
+                j = ~~(Math.random() * (i + 1));
+                temp = arr[i];
+                arr[i] = arr[j];
+                arr[j] = temp;
+            }
+
+            return arr;
+        }
+
+        for (var i in wordSets) {
+            var li = $('<li>');
+            $('<a class="word-set" href="#">')
+                .text(wordSets[i].name)
+                .data('word-set', wordSets[i].text)
+                .data('shuffle', wordSets[i].shuffle === true)
+                .data('limit', wordSets[i].limit)
+                .appendTo(li);
+            li.appendTo(container);
+        }
+
+        container.find('a.word-set').on('click', function() {
+            var wordSet = $(this).data('word-set');
+
+            if ($(this).data('shuffle') === true) {
+                wordSet = shuffle(wordSet.split(' ')).join(' ');
+            }
+
+            var limit = $(this).data('limit');
+            if (limit > 0) {
+                wordSet = wordSet.split(' ').slice(0, limit).join(' ');
+            }
+
+            $(that).trigger({
+                type: 'wordsetchange.wpm',
+                name: $(this).text(),
+                wordSet: wordSet,
+            });
+
+            container.find('li a.active').removeClass('active');
+            $(this).addClass('active').blur();
+            return false;
+        });
+    };
+})(jQuery);
+
 (function() {
     "use strict";
 
@@ -721,7 +721,7 @@
 
     window.WPM.firebaseURL = "http://wpm.firebaseio.com/";
 
-    window.WPM.paragraphs = [
+    window.WPM.wordSets = [
         {
             name: "Dvorak 1 [aeouhtns]",
             text: "eats unset seats noses onto asset sane note oath nests shut hates shush tans sate hues tune oats shoot shoe auto shot autos totes antes tenet huts nest ethos host shoos tonne tan sooth stone net nose stuns test east shout too shuts souse sheet one tenon son hose snots ton sent toes tees out senna nun tutus tease tunes sees tots that tho the state eases shoo aeon noon noose hath taste nosh hat hens tost hoes eons tutu teen neon hue ten anon nth tones neat tush anons sues ones set heats none teeth sea stun aunt stout",
@@ -778,9 +778,9 @@
     });
 
     // Views
-    var paraBox = new WPM.ParaBox(WPM.paragraphs, $('#para-box'));
-    $(paraBox).on('paragraphchange.wpm', function(e) {
-        game.start(e.name, e.paragraph, 3);
+    var wordSetBox = new WPM.WordSetBox(WPM.wordSets, $('#word-set-box'));
+    $(wordSetBox).on('wordsetchange.wpm', function(e) {
+        game.start(e.name, e.wordSet, 3);
     });
 
     var typeBox = new WPM.TypeBox($('#type-box'));

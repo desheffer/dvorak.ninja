@@ -22,15 +22,15 @@ meter::-webkit-meter-even-less-good-value {
 #widget {
     display: none;
 }
-.para {
+.word-set {
     margin-top: 1em;
 }
-.para a {
+.word-set a {
     border-radius: 10px;
     padding: 0 0.5em;
     text-decoration: underline;
 }
-.para a.active {
+.word-set a.active {
     background-color: #eee;
     color: black;
     text-decoration: none;

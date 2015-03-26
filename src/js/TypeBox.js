@@ -8,7 +8,7 @@
 
         this.modeChanged = function(e) {
             if (e.mode === modes.IDLE) {
-                type.html('<div class="overlay">Select a paragraph from above</div>');
+                type.html('<div class="overlay">Select a word set from above</div>');
             } else if (e.mode === modes.COUNTDOWN) {
                 type.html('<div class="overlay"></div>');
             } else if (e.mode === modes.PLAYING) {

@@ -3,7 +3,7 @@
 
     window.WPM = window.WPM || {};
 
-    window.WPM.ParaBox = function(paragraphs, container) {
+    window.WPM.WordSetBox = function(wordSets, container) {
         var that = this;
 
         function shuffle(arr) {
@@ -18,33 +18,33 @@
             return arr;
         }
 
-        for (var i in paragraphs) {
+        for (var i in wordSets) {
             var li = $('<li>');
-            $('<a class="paragraph" href="#">')
-                .text(paragraphs[i].name)
-                .data('paragraph', paragraphs[i].text)
-                .data('shuffle', paragraphs[i].shuffle === true)
-                .data('limit', paragraphs[i].limit)
+            $('<a class="word-set" href="#">')
+                .text(wordSets[i].name)
+                .data('word-set', wordSets[i].text)
+                .data('shuffle', wordSets[i].shuffle === true)
+                .data('limit', wordSets[i].limit)
                 .appendTo(li);
             li.appendTo(container);
         }
 
-        container.find('a.paragraph').on('click', function() {
-            var paragraph = $(this).data('paragraph');
+        container.find('a.word-set').on('click', function() {
+            var wordSet = $(this).data('word-set');
 
             if ($(this).data('shuffle') === true) {
-                paragraph = shuffle(paragraph.split(' ')).join(' ');
+                wordSet = shuffle(wordSet.split(' ')).join(' ');
             }
 
             var limit = $(this).data('limit');
             if (limit > 0) {
-                paragraph = paragraph.split(' ').slice(0, limit).join(' ');
+                wordSet = wordSet.split(' ').slice(0, limit).join(' ');
             }
 
             $(that).trigger({
-                type: 'paragraphchange.wpm',
+                type: 'wordsetchange.wpm',
                 name: $(this).text(),
-                paragraph: paragraph,
+                wordSet: wordSet,
             });
 
             container.find('li a.active').removeClass('active');

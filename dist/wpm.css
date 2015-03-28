@@ -1,4 +1,4 @@
-/*! wpm 2015-03-25 */
+/*! wpm 2015-03-28 */
 body {
     font-family: Consolas, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
     padding: 5em 0;
@@ -107,11 +107,13 @@ meter::-webkit-meter-even-less-good-value {
 }
 .layouts .map {
     cursor: pointer;
-    margin-left: 6em;
+    display: block;
 }
 .layouts .keyboard {
     color: #777;
+    display: inline-block;
     margin: 1em auto;
+    text-align: left;
 }
 .layouts .keyboard .row-1 {
     padding-left: 0.8em;

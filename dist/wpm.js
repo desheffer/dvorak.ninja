@@ -1,4 +1,4 @@
-/*! wpm 2015-03-25 */
+/*! wpm 2015-03-28 */
 (function($) {
     'use strict';
 
@@ -603,6 +603,14 @@
     window.WPM.TypeBox = function(type) {
         var modes = window.WPM.gameModes;
 
+        function htmlEscape(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/\s/g, '&nbsp;');
+        }
+
         this.modeChanged = function(e) {
             if (e.mode === modes.IDLE) {
                 type.html('<div class="overlay">Select a word set from above</div>');
@@ -625,10 +633,42 @@
         };
 
         this.textChanged = function(e) {
-            var remaining = e.notYetTyped.substr(e.incorrectlyTyped.length);
-            type.find('.correct').text(e.correctlyTyped);
-            type.find('.incorrect').text(e.incorrectlyTyped);
-            type.find('.remaining').text(remaining);
+            var i;
+
+            // Correct text is everything that has been typed correctly.  Line
+            // breaks are added after spaces.
+            var correct = '';
+            for (i = 0; i < e.correctlyTyped.length; i++) {
+                correct += htmlEscape(e.correctlyTyped[i]);
+                if (e.correctlyTyped[i] === ' ') {
+                    correct += '<wbr>';
+                }
+            }
+
+            // Incorrect text is anything that has been typed incorrectly.
+            // Line breaks are transposed from the spaces in the intended word
+            // list.
+            var incorrect = '';
+            for (i = 0; i < e.incorrectlyTyped.length; i++) {
+                incorrect += htmlEscape(e.incorrectlyTyped[i]);
+                if (i >= e.notYetTyped.length || e.notYetTyped[i] === ' ') {
+                    incorrect += '<wbr>';
+                }
+            }
+
+            // Remaining text is anything left to be typed minus errors.  Line
+            // breaks are added after spaces.
+            var remaining = '';
+            for (i = e.incorrectlyTyped.length; i < e.notYetTyped.length; i++) {
+                remaining += htmlEscape(e.notYetTyped[i]);
+                if (e.notYetTyped[i] === ' ') {
+                    remaining += '<wbr>';
+                }
+            }
+
+            type.find('.correct').html(correct);
+            type.find('.incorrect').html(incorrect);
+            type.find('.remaining').html(remaining);
         };
 
         this.scoreChanged = function(e) {

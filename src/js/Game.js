@@ -14,18 +14,33 @@
         var that = this;
 
         var modes = window.WPM.gameModes;
-
-        var mode;
-        var startTime;
         var timer;
 
+        // Current game mode.
+        var mode;
+
+        // Start time for the current game.
+        var startTime;
+
+        // Name of the current word set.
         var wordSetName;
+
+        // Current word list being typed, based on a word set.
         var wordsToType;
+
+        // Text that has been correctly typed, a subset of wordsToType.
         var correctlyTyped;
+
+        // Text that has been incorrectly typed.
         var incorrectlyTyped;
+
+        // Text that has not yet been correctly typed, a subset of wordsToType.
         var notYetTyped;
+
+        // Count of all letter presses for the current game.
         var totalTyped;
 
+        // Log of all correct letter presses.
         var times;
 
         function currentMode() {

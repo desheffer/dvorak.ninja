@@ -92,8 +92,14 @@
 
             for (i in e.times) {
                 var percent = (e.times[i].duration - min) / (max - min);
+
+                var letter = htmlEscape(e.times[i].letter);
+                if (e.times[i].letter === ' ') {
+                    letter += '<wbr>';
+                }
+
                 $('<span class="letter">')
-                    .text(e.times[i].letter)
+                    .html(letter)
                     .css('background-color', 'rgba(217, 83, 79, ' + percent + ')')
                     .appendTo(results);
             }

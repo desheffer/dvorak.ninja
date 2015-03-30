@@ -1,4 +1,4 @@
-/*! wpm 2015-03-28 */
+/*! wpm 2015-03-29 */
 (function($) {
     'use strict';
 
@@ -15,18 +15,33 @@
         var that = this;
 
         var modes = window.WPM.gameModes;
-
-        var mode;
-        var startTime;
         var timer;
 
+        // Current game mode.
+        var mode;
+
+        // Start time for the current game.
+        var startTime;
+
+        // Name of the current word set.
         var wordSetName;
+
+        // Current word list being typed, based on a word set.
         var wordsToType;
+
+        // Text that has been correctly typed, a subset of wordsToType.
         var correctlyTyped;
+
+        // Text that has been incorrectly typed.
         var incorrectlyTyped;
+
+        // Text that has not yet been correctly typed, a subset of wordsToType.
         var notYetTyped;
+
+        // Count of all letter presses for the current game.
         var totalTyped;
 
+        // Log of all correct letter presses.
         var times;
 
         function currentMode() {
@@ -689,8 +704,14 @@
 
             for (i in e.times) {
                 var percent = (e.times[i].duration - min) / (max - min);
+
+                var letter = htmlEscape(e.times[i].letter);
+                if (e.times[i].letter === ' ') {
+                    letter += '<wbr>';
+                }
+
                 $('<span class="letter">')
-                    .text(e.times[i].letter)
+                    .html(letter)
                     .css('background-color', 'rgba(217, 83, 79, ' + percent + ')')
                     .appendTo(results);
             }
@@ -794,7 +815,7 @@
         },
         {
             name: "Quote 1",
-            text: "Let me tell you why you're here. You're here because you know something. What you know you can't explain, but you feel it. You've felt it your entire life, that there's something wrong with the world. You don't know what it is, but it's there, like a splinter in your mind, driving you mad. It is this feeling that has brought you to me. Do you know what I'm talking about?",
+            text: "Let me tell you why you're here.  You're here because you know something.  What you know you can't explain, but you feel it.  You've felt it your entire life, that there's something wrong with the world.  You don't know what it is, but it's there, like a splinter in your mind, driving you mad.  It is this feeling that has brought you to me.  Do you know what I'm talking about?",
         },
     ];
 })();

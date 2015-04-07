@@ -40,5 +40,9 @@
             name: "Quote 1",
             text: "Let me tell you why you're here. You're here because you know something. What you know you can't explain, but you feel it. You've felt it your entire life, that there's something wrong with the world. You don't know what it is, but it's there, like a splinter in your mind, driving you mad. It is this feeling that has brought you to me. Do you know what I'm talking about?",
         },
+        {
+            name: "Quote 2",
+            text: "The path of the righteous man is beset on all sides by the iniquities of the selfish and the tyranny of evil men.  Blessed is he who, in the name of charity and good will, shepherds the weak through the valley of darkness, for he is truly his brother's keeper and the finder of lost children.  And I will strike down upon thee with great vengeance and furious anger those who attempt to poison and destroy my brothers.  And you will know my name is the Lord when I lay my vengeance upon thee.",
+        },
     ];
 })();

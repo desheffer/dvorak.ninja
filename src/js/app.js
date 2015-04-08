@@ -18,13 +18,12 @@
 
     // Views
     var wordSetBox = new WPM.WordSetBox(WPM.wordSets, $('#word-set-box'));
-    $(wordSetBox).on('wordsetchange.wpm', function(e) {
-        game.start(e.name, e.wordSet, 3);
+    $(wordSetBox).on('wordlistchange.wpm', function(e) {
+        game.changeWordList(e.name, e.wordList);
     });
 
     var typeBox = new WPM.TypeBox($('#type-box'));
     $(game).on('modechange.wpm', typeBox.modeChanged);
-    $(game).on('countdown.wpm', typeBox.countdown);
     $(game).on('textchange.wpm', typeBox.textChanged);
     $(game).on('scorechange.wpm', typeBox.scoreChanged);
 

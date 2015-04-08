@@ -30,21 +30,21 @@
         }
 
         container.find('a.word-set').on('click', function() {
-            var wordSet = $(this).data('word-set');
+            var wordList = $(this).data('word-set');
 
             if ($(this).data('shuffle') === true) {
-                wordSet = shuffle(wordSet.split(' ')).join(' ');
+                wordList = shuffle(wordList.split(' ')).join(' ');
             }
 
             var limit = $(this).data('limit');
             if (limit > 0) {
-                wordSet = wordSet.split(' ').slice(0, limit).join(' ');
+                wordList = wordList.split(' ').slice(0, limit).join(' ');
             }
 
             $(that).trigger({
-                type: 'wordsetchange.wpm',
+                type: 'wordlistchange.wpm',
                 name: $(this).text(),
-                wordSet: wordSet,
+                wordList: wordList,
             });
 
             container.find('li a.active').removeClass('active');

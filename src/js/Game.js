@@ -44,13 +44,13 @@
         var times;
 
         function currentMode() {
-            var now = $.now();
+            var hasText = notYetTyped !== undefined && notYetTyped.length > 0;
 
-            if (startTime !== undefined && now < startTime) {
+            if (hasText && startTime === undefined) {
                 return modes.PREGAME;
-            } else if (startTime !== undefined && now > startTime && notYetTyped !== undefined && notYetTyped.length > 0) {
+            } else if (hasText && startTime !== undefined) {
                 return modes.PLAYING;
-            } else if (notYetTyped === '') {
+            } else if (!hasText && startTime !== undefined) {
                 return modes.POSTGAME;
             }
 
@@ -103,32 +103,25 @@
                 });
             }
 
-            if (mode === modes.PREGAME) {
-                $(that).trigger({
-                    type: 'countdown.wpm',
-                    countdown: (startTime - $.now()) / 1000,
-                });
-            }
-
-            if (mode === modes.PREGAME || mode === modes.PLAYING) {
+            if (mode === modes.PLAYING) {
                 timer = setTimeout(tick, 100);
             }
         }
 
         this.init = function() {
+            if (mode !== undefined) {
+                return;
+            }
+
             tick();
         };
 
-        this.start = function(name, words, timeout) {
-            if (timeout === undefined) {
-                timeout = 0;
-            }
-
+        this.changeWordList = function(name, wordList) {
             mode = undefined;
-            startTime = $.now() + timeout * 1000;
+            startTime = undefined;
 
             wordSetName = name;
-            wordsToType = notYetTyped = words;
+            wordsToType = notYetTyped = wordList;
             correctlyTyped = incorrectlyTyped = '';
             totalTyped = 0;
             times = [];
@@ -136,7 +129,21 @@
             tick();
         };
 
+        this.start = function() {
+            if (mode !== modes.PREGAME) {
+                return;
+            }
+
+            startTime = $.now();
+            tick();
+        };
+
         this.letterTyped = function(letter) {
+            if (mode === modes.PREGAME) {
+                this.start();
+                return;
+            }
+
             if (mode !== modes.PLAYING) {
                 return;
             }

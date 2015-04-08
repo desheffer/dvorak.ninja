@@ -18,7 +18,7 @@
             if (e.mode === modes.IDLE) {
                 type.html('<div class="overlay">Select a word set from above</div>');
             } else if (e.mode === modes.PREGAME) {
-                type.html('<div class="overlay"></div>');
+                type.html('<div class="overlay">Press any key to begin</div>');
             } else if (e.mode === modes.PLAYING) {
                 type.html(
                     '<span class="correct"></span>' +
@@ -29,10 +29,6 @@
             }
 
             type.toggleClass('completed', e.mode === modes.POSTGAME);
-        };
-
-        this.countdown = function(e) {
-            type.find('.overlay').text('- ' + Math.ceil(e.countdown) + ' -');
         };
 
         this.textChanged = function(e) {

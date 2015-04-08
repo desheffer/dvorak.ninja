@@ -7,7 +7,7 @@
         var modes = window.WPM.gameModes;
 
         this.modeChanged = function(e) {
-            if (e.mode === modes.COUNTDOWN || e.mode === modes.IDLE) {
+            if (e.mode === modes.PREGAME || e.mode === modes.IDLE) {
                 stats.find('.wpm .value').text('---');
                 stats.find('.wpm-meter meter').val(0);
                 stats.find('.accuracy .value').text('---%');

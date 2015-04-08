@@ -5,9 +5,9 @@
 
     window.WPM.gameModes = {
         IDLE: 'idle',
-        COUNTDOWN: 'countdown',
+        PREGAME: 'pregame',
         PLAYING: 'playing',
-        COMPLETE: 'complete',
+        POSTGAME: 'postgame',
     };
 
     window.WPM.Game = function() {
@@ -47,11 +47,11 @@
             var now = $.now();
 
             if (startTime !== undefined && now < startTime) {
-                return modes.COUNTDOWN;
+                return modes.PREGAME;
             } else if (startTime !== undefined && now > startTime && notYetTyped !== undefined && notYetTyped.length > 0) {
                 return modes.PLAYING;
             } else if (notYetTyped === '') {
-                return modes.COMPLETE;
+                return modes.POSTGAME;
             }
 
             return modes.IDLE;
@@ -80,7 +80,7 @@
                     accuracy: accuracy,
                     wordSetName: wordSetName,
                     times: times,
-                    complete: mode !== modes.PLAYING,
+                    final: mode !== modes.PLAYING,
                 });
             }
 
@@ -92,7 +92,7 @@
                 });
             }
 
-            if (oldMode === modes.COUNTDOWN && mode === modes.PLAYING) {
+            if (oldMode === modes.PREGAME && mode === modes.PLAYING) {
                 $(that).trigger({
                     type: 'textchange.wpm',
                     correctlyTyped: correctlyTyped,
@@ -103,14 +103,14 @@
                 });
             }
 
-            if (mode === modes.COUNTDOWN) {
+            if (mode === modes.PREGAME) {
                 $(that).trigger({
                     type: 'countdown.wpm',
                     countdown: (startTime - $.now()) / 1000,
                 });
             }
 
-            if (mode === modes.COUNTDOWN || mode === modes.PLAYING) {
+            if (mode === modes.PREGAME || mode === modes.PLAYING) {
                 timer = setTimeout(tick, 100);
             }
         }

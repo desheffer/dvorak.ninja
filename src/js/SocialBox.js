@@ -80,7 +80,7 @@
             });
 
         this.scoreChanged = function(e) {
-            if (e.complete !== true) {
+            if (e.final !== true) {
                 return;
             }
 

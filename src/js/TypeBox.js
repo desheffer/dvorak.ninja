@@ -17,7 +17,7 @@
         this.modeChanged = function(e) {
             if (e.mode === modes.IDLE) {
                 type.html('<div class="overlay">Select a word set from above</div>');
-            } else if (e.mode === modes.COUNTDOWN) {
+            } else if (e.mode === modes.PREGAME) {
                 type.html('<div class="overlay"></div>');
             } else if (e.mode === modes.PLAYING) {
                 type.html(
@@ -28,7 +28,7 @@
                 );
             }
 
-            type.toggleClass('completed', e.mode === modes.COMPLETE);
+            type.toggleClass('completed', e.mode === modes.POSTGAME);
         };
 
         this.countdown = function(e) {
@@ -75,7 +75,7 @@
         };
 
         this.scoreChanged = function(e) {
-            if (!e.complete) {
+            if (!e.final) {
                 return;
             }
 

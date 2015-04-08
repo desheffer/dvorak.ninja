@@ -77,7 +77,7 @@
         }
 
         this.modeChanged = function(e) {
-            if (e.mode !== modes.COMPLETE) {
+            if (e.mode !== modes.POSTGAME) {
                 score.css('visibility', 'hidden');
                 score.find('.min .value1').text('--');
                 score.find('.min .value5').text('--');
@@ -88,7 +88,7 @@
         };
 
         this.scoreChanged = function(e) {
-            if (!e.complete) {
+            if (!e.final) {
                 return;
             }
 

@@ -1,24 +1,7 @@
-/*! wpm 2015-04-06 */
+/*! wpm 2015-04-08 */
 body {
     font-family: Consolas, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
     padding: 5em 0;
-}
-meter,
-meter::-webkit-meter-bar {
-    background: #ddd;
-    border-radius: 3px;
-}
-meter::-webkit-meter-optimum-value {
-    background: #5cb85c;
-    border-radius: 3px;
-}
-meter::-webkit-meter-suboptimum-value {
-    background: #f0ad4e;
-    border-radius: 3px;
-}
-meter::-webkit-meter-even-less-good-value {
-    background: #d9534f;
-    border-radius: 3px;
 }
 #widget {
     display: none;
@@ -93,11 +76,6 @@ meter::-webkit-meter-even-less-good-value {
 .stats .value {
     font-size: 14pt;
     text-align: center;
-}
-.stats .wpm-meter meter {
-    height: 1.5em;
-    margin-top: 1.6em;
-    width: 100%;
 }
 .nav-tabs {
     margin-top: 2em;

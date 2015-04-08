@@ -1,4 +1,4 @@
-/*! wpm 2015-04-06 */
+/*! wpm 2015-04-08 */
 (function($) {
     'use strict';
 
@@ -6,9 +6,9 @@
 
     window.WPM.gameModes = {
         IDLE: 'idle',
-        COUNTDOWN: 'countdown',
+        PREGAME: 'pregame',
         PLAYING: 'playing',
-        COMPLETE: 'complete',
+        POSTGAME: 'postgame',
     };
 
     window.WPM.Game = function() {
@@ -45,14 +45,14 @@
         var times;
 
         function currentMode() {
-            var now = $.now();
+            var hasText = notYetTyped !== undefined && notYetTyped.length > 0;
 
-            if (startTime !== undefined && now < startTime) {
-                return modes.COUNTDOWN;
-            } else if (startTime !== undefined && now > startTime && notYetTyped !== undefined && notYetTyped.length > 0) {
+            if (hasText && startTime === undefined) {
+                return modes.PREGAME;
+            } else if (hasText && startTime !== undefined) {
                 return modes.PLAYING;
-            } else if (notYetTyped === '') {
-                return modes.COMPLETE;
+            } else if (!hasText && startTime !== undefined) {
+                return modes.POSTGAME;
             }
 
             return modes.IDLE;
@@ -81,7 +81,7 @@
                     accuracy: accuracy,
                     wordSetName: wordSetName,
                     times: times,
-                    complete: mode !== modes.PLAYING,
+                    final: mode !== modes.PLAYING,
                 });
             }
 
@@ -93,7 +93,7 @@
                 });
             }
 
-            if (oldMode === modes.COUNTDOWN && mode === modes.PLAYING) {
+            if (oldMode === modes.PREGAME && mode === modes.PLAYING) {
                 $(that).trigger({
                     type: 'textchange.wpm',
                     correctlyTyped: correctlyTyped,
@@ -104,32 +104,25 @@
                 });
             }
 
-            if (mode === modes.COUNTDOWN) {
-                $(that).trigger({
-                    type: 'countdown.wpm',
-                    countdown: (startTime - $.now()) / 1000,
-                });
-            }
-
-            if (mode === modes.COUNTDOWN || mode === modes.PLAYING) {
+            if (mode === modes.PLAYING) {
                 timer = setTimeout(tick, 100);
             }
         }
 
         this.init = function() {
+            if (mode !== undefined) {
+                return;
+            }
+
             tick();
         };
 
-        this.start = function(name, words, timeout) {
-            if (timeout === undefined) {
-                timeout = 0;
-            }
-
+        this.changeWordList = function(name, wordList) {
             mode = undefined;
-            startTime = $.now() + timeout * 1000;
+            startTime = undefined;
 
             wordSetName = name;
-            wordsToType = notYetTyped = words;
+            wordsToType = notYetTyped = wordList;
             correctlyTyped = incorrectlyTyped = '';
             totalTyped = 0;
             times = [];
@@ -137,7 +130,21 @@
             tick();
         };
 
+        this.start = function() {
+            if (mode !== modes.PREGAME) {
+                return;
+            }
+
+            startTime = $.now();
+            tick();
+        };
+
         this.letterTyped = function(letter) {
+            if (mode === modes.PREGAME) {
+                this.start();
+                return;
+            }
+
             if (mode !== modes.PLAYING) {
                 return;
             }
@@ -442,7 +449,7 @@
         }
 
         this.modeChanged = function(e) {
-            if (e.mode !== modes.COMPLETE) {
+            if (e.mode !== modes.POSTGAME) {
                 score.css('visibility', 'hidden');
                 score.find('.min .value1').text('--');
                 score.find('.min .value5').text('--');
@@ -453,7 +460,7 @@
         };
 
         this.scoreChanged = function(e) {
-            if (!e.complete) {
+            if (!e.final) {
                 return;
             }
 
@@ -552,7 +559,7 @@
             });
 
         this.scoreChanged = function(e) {
-            if (e.complete !== true) {
+            if (e.final !== true) {
                 return;
             }
 
@@ -584,9 +591,8 @@
         var modes = window.WPM.gameModes;
 
         this.modeChanged = function(e) {
-            if (e.mode === modes.COUNTDOWN || e.mode === modes.IDLE) {
+            if (e.mode === modes.PREGAME || e.mode === modes.IDLE) {
                 stats.find('.wpm .value').text('---');
-                stats.find('.wpm-meter meter').val(0);
                 stats.find('.accuracy .value').text('---%');
                 stats.find('.characters .value').text('---');
                 stats.find('.time .value').text('-:--');
@@ -602,7 +608,6 @@
             }
 
             stats.find('.wpm .value').text(~~e.wpm);
-            stats.find('.wpm-meter meter').val(isFinite(e.wpm) ? e.wpm : 0);
             stats.find('.accuracy .value').text(~~e.accuracy + '%');
             stats.find('.characters .value').text(~~e.characters);
             stats.find('.time .value').text(time);
@@ -629,8 +634,8 @@
         this.modeChanged = function(e) {
             if (e.mode === modes.IDLE) {
                 type.html('<div class="overlay">Select a word set from above</div>');
-            } else if (e.mode === modes.COUNTDOWN) {
-                type.html('<div class="overlay"></div>');
+            } else if (e.mode === modes.PREGAME) {
+                type.html('<div class="overlay">Press any key to begin</div>');
             } else if (e.mode === modes.PLAYING) {
                 type.html(
                     '<span class="correct"></span>' +
@@ -640,11 +645,7 @@
                 );
             }
 
-            type.toggleClass('completed', e.mode === modes.COMPLETE);
-        };
-
-        this.countdown = function(e) {
-            type.find('.overlay').text('- ' + Math.ceil(e.countdown) + ' -');
+            type.toggleClass('completed', e.mode === modes.POSTGAME);
         };
 
         this.textChanged = function(e) {
@@ -687,7 +688,7 @@
         };
 
         this.scoreChanged = function(e) {
-            if (!e.complete) {
+            if (!e.final) {
                 return;
             }
 
@@ -751,21 +752,21 @@
         }
 
         container.find('a.word-set').on('click', function() {
-            var wordSet = $(this).data('word-set');
+            var wordList = $(this).data('word-set');
 
             if ($(this).data('shuffle') === true) {
-                wordSet = shuffle(wordSet.split(' ')).join(' ');
+                wordList = shuffle(wordList.split(' ')).join(' ');
             }
 
             var limit = $(this).data('limit');
             if (limit > 0) {
-                wordSet = wordSet.split(' ').slice(0, limit).join(' ');
+                wordList = wordList.split(' ').slice(0, limit).join(' ');
             }
 
             $(that).trigger({
-                type: 'wordsetchange.wpm',
+                type: 'wordlistchange.wpm',
                 name: $(this).text(),
-                wordSet: wordSet,
+                wordList: wordList,
             });
 
             container.find('li a.active').removeClass('active');
@@ -844,13 +845,12 @@
 
     // Views
     var wordSetBox = new WPM.WordSetBox(WPM.wordSets, $('#word-set-box'));
-    $(wordSetBox).on('wordsetchange.wpm', function(e) {
-        game.start(e.name, e.wordSet, 3);
+    $(wordSetBox).on('wordlistchange.wpm', function(e) {
+        game.changeWordList(e.name, e.wordList);
     });
 
     var typeBox = new WPM.TypeBox($('#type-box'));
     $(game).on('modechange.wpm', typeBox.modeChanged);
-    $(game).on('countdown.wpm', typeBox.countdown);
     $(game).on('textchange.wpm', typeBox.textChanged);
     $(game).on('scorechange.wpm', typeBox.scoreChanged);
 

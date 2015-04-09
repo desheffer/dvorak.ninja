@@ -1,8 +1,9 @@
 body {
-    font-family: Consolas, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
+    font-family: 'Ubuntu Mono', Consolas, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
+    font-size: 12pt;
 }
 header {
-    background-color: #333;
+    background-color: #000;
 }
 header h1 {
     color: white;
@@ -11,15 +12,15 @@ header h1 {
 }
 #widget {
     display: none;
-    margin-bottom: 4em;
-    margin-top: 4em;
+    margin-bottom: 2em;
+    margin-top: 3em;
 }
 .word-set {
     margin-top: 1em;
 }
 .word-set a {
     border-radius: 10px;
-    padding: 0 0.5em;
+    padding: 0.25em 0.5em;
     text-decoration: underline;
 }
 .word-set a.active {
@@ -32,27 +33,22 @@ header h1 {
     border: 1px solid #777;
 }
 .type-box {
-    font-size: 14pt;
-    min-height: 12em;
+    min-height: 14em;
     padding: 10px;
     position: relative;
     white-space: pre-wrap;
 }
 .type-box .overlay {
-    font-size: 32pt;
-    margin-top: 2em;
+    font-size: 2em;
+    margin-top: 3em;
     text-align: center;
 }
-.type-box .cursor {
-    animation: blink 1s steps(2, start) infinite;
-    -moz-animation: blink 1s steps(2, start) infinite;
-    -webkit-animation: blink 1s steps(2, start) infinite;
-    background-color: black;
-    display: inline-block;
-    height: 1em;
-    margin-top: 2pt;
-    position: absolute;
-    width: 2px;
+.type-box .correct,
+.type-box .incorrect,
+.type-box .remaining,
+.type-box .cursor,
+.type-box .results {
+    font-size: 1.4em;
 }
 .type-box .correct {
     color: #ccc;
@@ -63,6 +59,17 @@ header h1 {
 }
 .type-box .remaining {
     color: #777;
+}
+.type-box .cursor {
+    animation: blink 1s steps(2, start) infinite;
+    -moz-animation: blink 1s steps(2, start) infinite;
+    -webkit-animation: blink 1s steps(2, start) infinite;
+    background-color: black;
+    display: inline-block;
+    height: 1em;
+    margin-top: 0.2em;
+    position: absolute;
+    width: 2px;
 }
 .score-box {
     background-color: #d9edf7;
@@ -77,12 +84,10 @@ header h1 {
     padding-top: 1em;
 }
 .stats .stat {
-    font-size: 10pt;
-    font-weight: bold;
     text-align: center;
 }
 .stats .value {
-    font-size: 14pt;
+    font-size: 1.2em;
     text-align: center;
 }
 .nav-tabs {
@@ -126,6 +131,10 @@ header h1 {
     -webkit-transition-delay: 1s;
     transition-delay: 1s;
 }
+label {
+    font-weight: normal;
+}
+
 @keyframes blink {
     to {
         visibility: hidden;

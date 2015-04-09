@@ -16,9 +16,9 @@
 
         this.modeChanged = function(e) {
             if (e.mode === modes.IDLE) {
-                type.html('<div class="overlay">Select a word set from above</div>');
+                type.html('<div class="overlay">&mdash; Select a word set from above &mdash;</div>');
             } else if (e.mode === modes.PREGAME) {
-                type.html('<div class="overlay">Press any key to begin</div>');
+                type.html('<div class="overlay">&mdash; Press any key to begin &mdash;</div>');
             } else if (e.mode === modes.PLAYING) {
                 type.html(
                     '<span class="correct"></span>' +

@@ -142,3 +142,8 @@ header h1 {
         visibility: hidden;
     }
 }
+
+/* Fix for IE */
+wbr:after {
+    content: '\00200B';
+}

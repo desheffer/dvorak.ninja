@@ -1,4 +1,4 @@
-/*! wpm 2015-04-08 */
+/*! dvorak.ninja 2015-04-10 */
 (function($) {
     'use strict';
 
@@ -65,7 +65,9 @@
             var oldMode = mode;
             mode = currentMode();
 
-            if (oldMode === modes.PLAYING) {
+            // Trigger the score change event when the game mode is PLAYING or
+            // has just changed from PLAYING.
+            if (oldMode === modes.PLAYING || mode === modes.PLAYING) {
                 var seconds = ($.now() - startTime) / 1000;
                 var characters = correctlyTyped.length;
                 var words = correctlyTyped.length / 5;
@@ -74,6 +76,7 @@
 
                 $(that).trigger({
                     type: 'scorechange.wpm',
+                    mode: mode,
                     seconds: seconds,
                     characters: characters,
                     words: words,
@@ -81,10 +84,10 @@
                     accuracy: accuracy,
                     wordSetName: wordSetName,
                     times: times,
-                    final: mode !== modes.PLAYING,
                 });
             }
 
+            // Trigger the mode change event.
             if (mode !== oldMode) {
                 $(that).trigger({
                     type: 'modechange.wpm',
@@ -93,9 +96,10 @@
                 });
             }
 
-            if (oldMode === modes.PREGAME && mode === modes.PLAYING) {
+            if (mode === modes.PREGAME || oldMode === modes.PREGAME) {
                 $(that).trigger({
                     type: 'textchange.wpm',
+                    mode: mode,
                     correctlyTyped: correctlyTyped,
                     incorrectlyTyped: incorrectlyTyped,
                     notYetTyped: notYetTyped,
@@ -118,7 +122,6 @@
         };
 
         this.changeWordList = function(name, wordList) {
-            mode = undefined;
             startTime = undefined;
 
             wordSetName = name;
@@ -307,6 +310,8 @@
     window.WPM.LayoutBox = function(qwertyContainer, dvorakContainer, mapQwertyToDvorakCheckbox) {
         var that = this;
 
+        var modes = window.WPM.gameModes;
+
         var layouts = {
             qwerty: [
                 ['Qq', 'Ww', 'Ee', 'Rr', 'Tt', 'Yy', 'Uu', 'Ii', 'Oo', 'Pp', '[{', ']}'],
@@ -344,6 +349,10 @@
         };
 
         this.textChanged = function(e) {
+            if (e.mode !== modes.PLAYING) {
+                return;
+            }
+
             qwertyContainer.find('.key.next').removeClass('next');
             dvorakContainer.find('.key.next').removeClass('next');
 
@@ -460,7 +469,7 @@
         };
 
         this.scoreChanged = function(e) {
-            if (!e.final) {
+            if (e.mode !== modes.POSTGAME) {
                 return;
             }
 
@@ -484,6 +493,8 @@
     window.WPM = window.WPM || {};
 
     window.WPM.SocialBox = function(social) {
+        var modes = window.WPM.gameModes;
+
         var firebase = new Firebase(window.WPM.firebaseURL);
         var user;
 
@@ -559,7 +570,7 @@
             });
 
         this.scoreChanged = function(e) {
-            if (e.final !== true) {
+            if (e.mode !== modes.POSTGAME) {
                 return;
             }
 
@@ -620,7 +631,7 @@
 
     window.WPM = window.WPM || {};
 
-    window.WPM.TypeBox = function(type) {
+    window.WPM.TypeBox = function(type, overlay) {
         var modes = window.WPM.gameModes;
 
         function htmlEscape(str) {
@@ -633,10 +644,13 @@
 
         this.modeChanged = function(e) {
             if (e.mode === modes.IDLE) {
-                type.html('<div class="overlay">Select a word set from above</div>');
+                overlay.html('&mdash; Select a word set from above &mdash;').show();
+                type.html('');
             } else if (e.mode === modes.PREGAME) {
-                type.html('<div class="overlay">Press any key to begin</div>');
+                overlay.html('&mdash; Press any key to begin &mdash;').show();
+                type.html('<span class="remaining"></span>');
             } else if (e.mode === modes.PLAYING) {
+                overlay.html('').hide();
                 type.html(
                     '<span class="correct"></span>' +
                     '<span class="incorrect"></span>' +
@@ -688,7 +702,7 @@
         };
 
         this.scoreChanged = function(e) {
-            if (!e.final) {
+            if (e.mode !== modes.POSTGAME) {
                 return;
             }
 
@@ -849,7 +863,7 @@
         game.changeWordList(e.name, e.wordList);
     });
 
-    var typeBox = new WPM.TypeBox($('#type-box'));
+    var typeBox = new WPM.TypeBox($('#type-box'), $('#overlay-box'));
     $(game).on('modechange.wpm', typeBox.modeChanged);
     $(game).on('textchange.wpm', typeBox.textChanged);
     $(game).on('scorechange.wpm', typeBox.scoreChanged);

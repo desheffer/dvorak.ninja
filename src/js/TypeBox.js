@@ -3,7 +3,7 @@
 
     window.WPM = window.WPM || {};
 
-    window.WPM.TypeBox = function(type) {
+    window.WPM.TypeBox = function(type, overlay) {
         var modes = window.WPM.gameModes;
 
         function htmlEscape(str) {
@@ -16,10 +16,13 @@
 
         this.modeChanged = function(e) {
             if (e.mode === modes.IDLE) {
-                type.html('<div class="overlay">&mdash; Select a word set from above &mdash;</div>');
+                overlay.html('&mdash; Select a word set from above &mdash;').show();
+                type.html('');
             } else if (e.mode === modes.PREGAME) {
-                type.html('<div class="overlay">&mdash; Press any key to begin &mdash;</div>');
+                overlay.html('&mdash; Press any key to begin &mdash;').show();
+                type.html('<span class="remaining"></span>');
             } else if (e.mode === modes.PLAYING) {
+                overlay.html('').hide();
                 type.html(
                     '<span class="correct"></span>' +
                     '<span class="incorrect"></span>' +
@@ -71,7 +74,7 @@
         };
 
         this.scoreChanged = function(e) {
-            if (!e.final) {
+            if (e.mode !== modes.POSTGAME) {
                 return;
             }
 

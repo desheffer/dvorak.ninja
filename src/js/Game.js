@@ -64,7 +64,9 @@
             var oldMode = mode;
             mode = currentMode();
 
-            if (oldMode === modes.PLAYING) {
+            // Trigger the score change event when the game mode is PLAYING or
+            // has just changed from PLAYING.
+            if (oldMode === modes.PLAYING || mode === modes.PLAYING) {
                 var seconds = ($.now() - startTime) / 1000;
                 var characters = correctlyTyped.length;
                 var words = correctlyTyped.length / 5;
@@ -73,6 +75,7 @@
 
                 $(that).trigger({
                     type: 'scorechange.wpm',
+                    mode: mode,
                     seconds: seconds,
                     characters: characters,
                     words: words,
@@ -80,10 +83,10 @@
                     accuracy: accuracy,
                     wordSetName: wordSetName,
                     times: times,
-                    final: mode !== modes.PLAYING,
                 });
             }
 
+            // Trigger the mode change event.
             if (mode !== oldMode) {
                 $(that).trigger({
                     type: 'modechange.wpm',
@@ -92,9 +95,10 @@
                 });
             }
 
-            if (oldMode === modes.PREGAME && mode === modes.PLAYING) {
+            if (mode === modes.PREGAME || oldMode === modes.PREGAME) {
                 $(that).trigger({
                     type: 'textchange.wpm',
+                    mode: mode,
                     correctlyTyped: correctlyTyped,
                     incorrectlyTyped: incorrectlyTyped,
                     notYetTyped: notYetTyped,
@@ -117,7 +121,6 @@
         };
 
         this.changeWordList = function(name, wordList) {
-            mode = undefined;
             startTime = undefined;
 
             wordSetName = name;

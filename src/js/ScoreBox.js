@@ -88,7 +88,7 @@
         };
 
         this.scoreChanged = function(e) {
-            if (!e.final) {
+            if (e.mode !== modes.POSTGAME) {
                 return;
             }
 

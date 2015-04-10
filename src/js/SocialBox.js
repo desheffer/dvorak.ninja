@@ -5,6 +5,8 @@
     window.WPM = window.WPM || {};
 
     window.WPM.SocialBox = function(social) {
+        var modes = window.WPM.gameModes;
+
         var firebase = new Firebase(window.WPM.firebaseURL);
         var user;
 
@@ -80,7 +82,7 @@
             });
 
         this.scoreChanged = function(e) {
-            if (e.final !== true) {
+            if (e.mode !== modes.POSTGAME) {
                 return;
             }
 

@@ -1,4 +1,4 @@
-# Words Per Minute
+# dvorak.ninja
 
 This is a simple game for measuring your typing speed or learning a new
 keyboard layout.  It is designed to teach the Dvorak keyboard layout, although
@@ -9,5 +9,5 @@ type, the game will show your calculated words per minute (WPM) score in real
 time, as well as other statistics.
 
 If you choose, you can enable on-the-fly Dvorak mapping.  This allows you to
-experiment with an alternate keyboard layout without changing any settings on
+experiment with this alternate keyboard layout without changing any settings on
 your computer.

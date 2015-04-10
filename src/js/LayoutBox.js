@@ -6,6 +6,8 @@
     window.WPM.LayoutBox = function(qwertyContainer, dvorakContainer, mapQwertyToDvorakCheckbox) {
         var that = this;
 
+        var modes = window.WPM.gameModes;
+
         var layouts = {
             qwerty: [
                 ['Qq', 'Ww', 'Ee', 'Rr', 'Tt', 'Yy', 'Uu', 'Ii', 'Oo', 'Pp', '[{', ']}'],
@@ -43,6 +45,10 @@
         };
 
         this.textChanged = function(e) {
+            if (e.mode !== modes.PLAYING) {
+                return;
+            }
+
             qwertyContainer.find('.key.next').removeClass('next');
             dvorakContainer.find('.key.next').removeClass('next');
 

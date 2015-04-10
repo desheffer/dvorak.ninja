@@ -22,7 +22,7 @@
         game.changeWordList(e.name, e.wordList);
     });
 
-    var typeBox = new WPM.TypeBox($('#type-box'));
+    var typeBox = new WPM.TypeBox($('#type-box'), $('#overlay-box'));
     $(game).on('modechange.wpm', typeBox.modeChanged);
     $(game).on('textchange.wpm', typeBox.textChanged);
     $(game).on('scorechange.wpm', typeBox.scoreChanged);

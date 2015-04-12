@@ -1,4 +1,4 @@
-/*! dvorak.ninja 2015-04-10 */
+/*! dvorak.ninja 2015-04-12 */
 (function($) {
     'use strict';
 
@@ -795,7 +795,7 @@
 
     window.WPM = window.WPM || {};
 
-    window.WPM.firebaseURL = "http://wpm.firebaseio.com/";
+    window.WPM.firebaseURL = "http://dvorak-ninja.firebaseio.com/";
 
     window.WPM.wordSets = [
         {

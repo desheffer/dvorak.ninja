@@ -5,8 +5,6 @@
     window.WPM = window.WPM || {};
 
     window.WPM.SocialBox = function(social) {
-        var that = this;
-
         var modes = window.WPM.gameModes;
 
         var firebase = new Firebase(window.WPM.firebaseURL);
@@ -32,22 +30,35 @@
             return 'Guest' + djb2(str).toString(10).substr(-5);
         }
 
-        firebase.authAnonymously(function(error, authData) {
-            if (authData) {
-                user = authData;
+        firebase.onAuth(function(authData) {
+            user = authData;
 
-                var userRef = firebase.child('presence').child(user.uid);
-                userRef.onDisconnect().remove();
-                userRef.set(true);
-
-                // social.find('.me .avatar').css('background-color', hashToColor(user.uid));
-                // social.find('.me .name').text(hashToName(user.uid));
+            if (user.displayName === undefined) {
+                user.displayName = hashToName(user.uid);
             }
+
+            var userRef = firebase.child('presence').child(user.uid);
+            userRef.onDisconnect().remove();
+            userRef.set(true);
         });
 
+        firebase.offAuth(function() {
+            var userRef = firebase.child('presence').child(user.uid);
+            userRef.remove();
+        });
+
+        // All users are automatically authenticated anonymously.
+        if (!firebase.getAuth()) {
+            firebase.authAnonymously(function() {
+            });
+        }
+
+        // Users can choose to authenticate with Google.
         $('<a href="#">Login with Google</a>')
             .on('click', function () {
-                that.authWithGoogle();
+                firebase.authWithOAuthPopup('google', function() {
+                });
+
                 return false;
             })
             .appendTo(social);
@@ -97,7 +108,8 @@
 
             firebase.child('score').push({
                 user: {
-                    name: hashToName(user.uid),
+                    name: user.displayName, // TODO: Remove at some point.
+                    displayName: user.displayName,
                 },
                 timestamp: e.timeStamp,
                 wordSet: {
@@ -109,13 +121,6 @@
                     wpm: e.wpm,
                     accuracy: e.accuracy,
                 },
-            });
-        };
-
-        this.authWithGoogle = function() {
-            firebase.authWithOAuthPopup('google', function(error, authData) {
-                console.log(error);
-                console.log(authData);
             });
         };
     };

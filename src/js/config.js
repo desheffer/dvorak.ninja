@@ -3,7 +3,7 @@
 
     window.WPM = window.WPM || {};
 
-    window.WPM.firebaseURL = "http://wpm.firebaseio.com/";
+    window.WPM.firebaseURL = "http://dvorak-ninja.firebaseio.com/";
 
     window.WPM.wordSets = [
         {

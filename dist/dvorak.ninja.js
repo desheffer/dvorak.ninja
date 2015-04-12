@@ -493,6 +493,8 @@
     window.WPM = window.WPM || {};
 
     window.WPM.SocialBox = function(social) {
+        var that = this;
+
         var modes = window.WPM.gameModes;
 
         var firebase = new Firebase(window.WPM.firebaseURL);
@@ -530,6 +532,13 @@
                 // social.find('.me .name').text(hashToName(user.uid));
             }
         });
+
+        $('<a href="#">Login with Google</a>')
+            .on('click', function () {
+                that.authWithGoogle();
+                return false;
+            })
+            .appendTo(social);
 
         firebase.child('presence')
             .on('value', function(snapshot) {
@@ -588,6 +597,13 @@
                     wpm: e.wpm,
                     accuracy: e.accuracy,
                 },
+            });
+        };
+
+        this.authWithGoogle = function() {
+            firebase.authWithOAuthPopup('google', function(error, authData) {
+                console.log(error);
+                console.log(authData);
             });
         };
     };

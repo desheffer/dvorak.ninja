@@ -22,23 +22,6 @@
             return 'Guest' + djb2(str).toString(10).substr(-5);
         }
 
-        firebase.onAuth(function(authData) {
-            user = authData;
-
-            if (user && user.provider === 'anonymous') {
-                user.displayName = hashToName(user.uid);
-            } else if (user && user.provider === 'google') {
-                user.displayName = user.google.displayName;
-            }
-
-            updateLinks();
-
-            $(that).trigger({
-                type: 'userchange.wpm',
-                user: user,
-            });
-        });
-
         function updateLinks() {
             if (user) {
                 login.find('.username').text(user.displayName);
@@ -68,8 +51,28 @@
             }
         }
 
-        if (!firebase.getAuth()) {
-            firebase.authAnonymously(function() {});
-        }
+        this.init = function() {
+            // Delay binding until something is listening.
+            firebase.onAuth(function(authData) {
+                user = authData;
+
+                if (user && user.provider === 'anonymous') {
+                    user.displayName = hashToName(user.uid);
+                } else if (user && user.provider === 'google') {
+                    user.displayName = user.google.displayName;
+                }
+
+                updateLinks();
+
+                $(that).trigger({
+                    type: 'userchange.wpm',
+                    user: user,
+                });
+            });
+
+            if (!firebase.getAuth()) {
+                firebase.authAnonymously(function() {});
+            }
+        };
     };
 })($, Firebase);

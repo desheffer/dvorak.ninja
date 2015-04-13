@@ -412,11 +412,7 @@
                 user.displayName = user.google.displayName;
             }
 
-            var userRef = firebase.child('presence').child(user.uid);
-            userRef.onDisconnect().remove();
-            userRef.set(true);
-
-            afterAuth();
+            updateLinks();
 
             $(that).trigger({
                 type: 'userchange.wpm',
@@ -427,11 +423,7 @@
             });
         });
 
-        firebase.offAuth(function() {
-            firebase.child('presence').child(user.uid).remove();
-        });
-
-        function afterAuth() {
+        function updateLinks() {
             var showLogin = false;
             var showLogout = false;
 
@@ -634,7 +626,20 @@
             });
 
         this.userChanged = function(newUser) {
+            // Remove presence for old session.
+            if (user !== undefined) {
+                firebase.child('presence').child(user.uid).remove();
+            }
+
             user = newUser;
+
+            // Add presence for new session.
+            if (user !== undefined) {
+                var userRef = firebase.child('presence').child(user.uid);
+                userRef.onDisconnect().remove();
+                userRef.set(true);
+            }
+
         };
 
         this.scoreChanged = function(e) {

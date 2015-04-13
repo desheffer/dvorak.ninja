@@ -41,9 +41,9 @@
 
         function updateLinks() {
             if (user) {
-                login.find('.status').text(user.displayName);
+                login.find('.username').text(user.displayName);
             } else {
-                login.find('.status').text('');
+                login.find('.username').text('---------');
             }
 
             login.find('.links').html('');

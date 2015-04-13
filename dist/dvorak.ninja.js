@@ -416,10 +416,7 @@
 
             $(that).trigger({
                 type: 'userchange.wpm',
-                user: {
-                    uid: user.uid,
-                    displayName: user.displayName,
-                },
+                user: user,
             });
         });
 

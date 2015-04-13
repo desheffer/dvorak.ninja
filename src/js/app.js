@@ -49,6 +49,7 @@
     $(loginBox).on('userchange.wpm', function(e) {
         socialBox.userChanged(e.user);
     });
+    loginBox.init();
 
     // Start the game loop
     game.init();

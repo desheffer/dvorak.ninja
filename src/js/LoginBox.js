@@ -40,34 +40,24 @@
         });
 
         function updateLinks() {
-            var showLogin = false;
-            var showLogout = false;
-
-            if (!user) {
-                login.find('.status').text('Not logged in');
-                showLogin = true;
-            } else if (user.provider === 'anonymous') {
+            if (user) {
                 login.find('.status').text(user.displayName);
-                showLogin = true;
             } else {
-                login.find('.status').text(user.displayName);
-                showLogout = true;
+                login.find('.status').text('');
             }
 
             login.find('.links').html('');
 
-            if (showLogin) {
-                $('<a href="#">Login</a>')
+            if (!user || user.provider === 'anonymous') {
+                $('<a href="#">Log in</a>')
                     .on('click', function () {
                         firebase.authWithOAuthPopup('google', function() {});
 
                         return false;
                     })
                     .appendTo(login.find('.links'));
-            }
-
-            if (showLogout) {
-                $('<a href="#">Logout</a>')
+            } else {
+                $('<a href="#">Log out</a>')
                     .on('click', function () {
                         firebase.unauth(function() {});
                         firebase.authAnonymously(function() {});

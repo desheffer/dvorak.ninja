@@ -403,28 +403,11 @@
             return 'Guest' + djb2(str).toString(10).substr(-5);
         }
 
-        firebase.onAuth(function(authData) {
-            user = authData;
-
-            if (user && user.provider === 'anonymous') {
-                user.displayName = hashToName(user.uid);
-            } else if (user && user.provider === 'google') {
-                user.displayName = user.google.displayName;
-            }
-
-            updateLinks();
-
-            $(that).trigger({
-                type: 'userchange.wpm',
-                user: user,
-            });
-        });
-
         function updateLinks() {
             if (user) {
-                login.find('.status').text(user.displayName);
+                login.find('.username').text(user.displayName);
             } else {
-                login.find('.status').text('');
+                login.find('.username').text('---------');
             }
 
             login.find('.links').html('');
@@ -449,9 +432,29 @@
             }
         }
 
-        if (!firebase.getAuth()) {
-            firebase.authAnonymously(function() {});
-        }
+        this.init = function() {
+            // Delay binding until something is listening.
+            firebase.onAuth(function(authData) {
+                user = authData;
+
+                if (user && user.provider === 'anonymous') {
+                    user.displayName = hashToName(user.uid);
+                } else if (user && user.provider === 'google') {
+                    user.displayName = user.google.displayName;
+                }
+
+                updateLinks();
+
+                $(that).trigger({
+                    type: 'userchange.wpm',
+                    user: user,
+                });
+            });
+
+            if (!firebase.getAuth()) {
+                firebase.authAnonymously(function() {});
+            }
+        };
     };
 })($, Firebase);
 
@@ -950,6 +953,7 @@
     $(loginBox).on('userchange.wpm', function(e) {
         socialBox.userChanged(e.user);
     });
+    loginBox.init();
 
     // Start the game loop
     game.init();

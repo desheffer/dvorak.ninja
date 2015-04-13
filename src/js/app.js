@@ -34,7 +34,7 @@
     var layoutBox = new WPM.LayoutBox($('#qwerty-layout'), $('#dvorak-layout'), $('#map-qwerty-to-dvorak'));
     $(game).on('modechange.wpm', layoutBox.modeChanged);
     $(game).on('textchange.wpm', layoutBox.textChanged);
-    $(layoutBox).on('layoutchange.wpm', function (e) {
+    $(layoutBox).on('layoutchange.wpm', function(e) {
         keyboardMapper.changeMap(e.mapName);
     });
 
@@ -44,6 +44,11 @@
 
     var socialBox = new WPM.SocialBox($('#social-box'));
     $(game).on('scorechange.wpm', socialBox.scoreChanged);
+
+    var loginBox = new WPM.LoginBox($('#login-box'));
+    $(loginBox).on('userchange.wpm', function(e) {
+        socialBox.userChanged(e.user);
+    });
 
     // Start the game loop
     game.init();

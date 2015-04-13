@@ -55,6 +55,7 @@ module.exports = function(grunt) {
           'src/js/Input.js',
           'src/js/KeyboardMapper.js',
           'src/js/LayoutBox.js',
+          'src/js/LoginBox.js',
           'src/js/ScoreBox.js',
           'src/js/SocialBox.js',
           'src/js/StatsBox.js',

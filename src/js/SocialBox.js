@@ -49,7 +49,20 @@
             });
 
         this.userChanged = function(newUser) {
+            // Remove presence for old session.
+            if (user !== undefined) {
+                firebase.child('presence').child(user.uid).remove();
+            }
+
             user = newUser;
+
+            // Add presence for new session.
+            if (user !== undefined) {
+                var userRef = firebase.child('presence').child(user.uid);
+                userRef.onDisconnect().remove();
+                userRef.set(true);
+            }
+
         };
 
         this.scoreChanged = function(e) {

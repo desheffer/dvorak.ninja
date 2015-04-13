@@ -600,7 +600,7 @@
                 var date = new Date(val.timestamp);
 
                 var tr = $('<tr>');
-                $('<td>').text(val.user.name).appendTo(tr);
+                $('<td>').text(val.user.displayName).appendTo(tr);
                 $('<td>').text(~~val.score.wpm).appendTo(tr);
                 $('<td>').text(~~val.score.accuracy + '%').appendTo(tr);
                 $('<td>').text(~~val.score.characters).appendTo(tr);

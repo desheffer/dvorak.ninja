@@ -31,11 +31,7 @@
                 user.displayName = user.google.displayName;
             }
 
-            var userRef = firebase.child('presence').child(user.uid);
-            userRef.onDisconnect().remove();
-            userRef.set(true);
-
-            afterAuth();
+            updateLinks();
 
             $(that).trigger({
                 type: 'userchange.wpm',
@@ -46,11 +42,7 @@
             });
         });
 
-        firebase.offAuth(function() {
-            firebase.child('presence').child(user.uid).remove();
-        });
-
-        function afterAuth() {
+        function updateLinks() {
             var showLogin = false;
             var showLogout = false;
 

@@ -1,4 +1,4 @@
-/*! dvorak.ninja 2015-04-12 */
+/*! dvorak.ninja 2015-04-13 */
 body {
     font-family: 'Ubuntu Mono', Consolas, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
     font-size: 12pt;
@@ -12,7 +12,7 @@ header h1 {
     font-size: 1.25em;
     margin: 0.75em 0;
 }
-header .tag {
+header .login {
     margin: 1em 0;
     text-align: right;
 }

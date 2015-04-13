@@ -1,4 +1,4 @@
-/*! dvorak.ninja 2015-04-12 */
+/*! dvorak.ninja 2015-04-13 */
 (function($) {
     'use strict';
 
@@ -379,6 +379,103 @@
     };
 })(jQuery);
 
+/* global Firebase: false */
+(function($, Firebase) {
+    'use strict';
+
+    window.WPM = window.WPM || {};
+
+    window.WPM.LoginBox = function(login) {
+        var that = this;
+
+        var firebase = new Firebase(window.WPM.firebaseURL);
+        var user;
+
+        function djb2(str){
+            var hash = 5381;
+            for (var i = 0; i < str.length; i++) {
+                hash = (hash << 5) + hash + str.charCodeAt(i);
+            }
+            return hash;
+        }
+
+        function hashToName(str) {
+            return 'Guest' + djb2(str).toString(10).substr(-5);
+        }
+
+        firebase.onAuth(function(authData) {
+            user = authData;
+
+            if (user && user.provider === 'anonymous') {
+                user.displayName = hashToName(user.uid);
+            } else if (user && user.provider === 'google') {
+                user.displayName = user.google.displayName;
+            }
+
+            var userRef = firebase.child('presence').child(user.uid);
+            userRef.onDisconnect().remove();
+            userRef.set(true);
+
+            afterAuth();
+
+            $(that).trigger({
+                type: 'userchange.wpm',
+                user: {
+                    uid: user.uid,
+                    displayName: user.displayName,
+                },
+            });
+        });
+
+        firebase.offAuth(function() {
+            firebase.child('presence').child(user.uid).remove();
+        });
+
+        function afterAuth() {
+            var showLogin = false;
+            var showLogout = false;
+
+            if (!user) {
+                login.find('.status').text('Not logged in');
+                showLogin = true;
+            } else if (user.provider === 'anonymous') {
+                login.find('.status').text(user.displayName);
+                showLogin = true;
+            } else {
+                login.find('.status').text(user.displayName);
+                showLogout = true;
+            }
+
+            login.find('.links').html('');
+
+            if (showLogin) {
+                $('<a href="#">Login</a>')
+                    .on('click', function () {
+                        firebase.authWithOAuthPopup('google', function() {});
+
+                        return false;
+                    })
+                    .appendTo(login.find('.links'));
+            }
+
+            if (showLogout) {
+                $('<a href="#">Logout</a>')
+                    .on('click', function () {
+                        firebase.unauth(function() {});
+                        firebase.authAnonymously(function() {});
+
+                        return false;
+                    })
+                    .appendTo(login.find('.links'));
+            }
+        }
+
+        if (!firebase.getAuth()) {
+            firebase.authAnonymously(function() {});
+        }
+    };
+})($, Firebase);
+
 (function() {
     'use strict';
 
@@ -498,59 +595,6 @@
         var firebase = new Firebase(window.WPM.firebaseURL);
         var user;
 
-        function djb2(str){
-            var hash = 5381;
-            for (var i = 0; i < str.length; i++) {
-                hash = ((hash << 5) + hash) + str.charCodeAt(i); /* hash * 33 + c */
-            }
-            return hash;
-        }
-
-        // function hashToColor(str) {
-        //     var hash = djb2(str);
-        //     var r = (hash & 0xFF0000) >> 16;
-        //     var g = (hash & 0x00FF00) >> 8;
-        //     var b = hash & 0x0000FF;
-        //     return '#' + ('0' + r.toString(16)).substr(-2) + ('0' + g.toString(16)).substr(-2) + ('0' + b.toString(16)).substr(-2);
-        // }
-
-        function hashToName(str) {
-            return 'Guest' + djb2(str).toString(10).substr(-5);
-        }
-
-        firebase.onAuth(function(authData) {
-            user = authData;
-
-            if (user.displayName === undefined) {
-                user.displayName = hashToName(user.uid);
-            }
-
-            var userRef = firebase.child('presence').child(user.uid);
-            userRef.onDisconnect().remove();
-            userRef.set(true);
-        });
-
-        firebase.offAuth(function() {
-            var userRef = firebase.child('presence').child(user.uid);
-            userRef.remove();
-        });
-
-        // All users are automatically authenticated anonymously.
-        if (!firebase.getAuth()) {
-            firebase.authAnonymously(function() {
-            });
-        }
-
-        // Users can choose to authenticate with Google.
-        $('<a href="#">Login with Google</a>')
-            .on('click', function () {
-                firebase.authWithOAuthPopup('google', function() {
-                });
-
-                return false;
-            })
-            .appendTo(social);
-
         firebase.child('presence')
             .on('value', function(snapshot) {
                 var count = Object.keys(snapshot.val()).length;
@@ -589,6 +633,10 @@
                 tbody.children().slice(5).remove();
             });
 
+        this.userChanged = function(newUser) {
+            user = newUser;
+        };
+
         this.scoreChanged = function(e) {
             if (e.mode !== modes.POSTGAME) {
                 return;
@@ -596,7 +644,6 @@
 
             firebase.child('score').push({
                 user: {
-                    name: user.displayName, // TODO: Remove at some point.
                     displayName: user.displayName,
                 },
                 timestamp: e.timeStamp,
@@ -896,7 +943,7 @@
     var layoutBox = new WPM.LayoutBox($('#qwerty-layout'), $('#dvorak-layout'), $('#map-qwerty-to-dvorak'));
     $(game).on('modechange.wpm', layoutBox.modeChanged);
     $(game).on('textchange.wpm', layoutBox.textChanged);
-    $(layoutBox).on('layoutchange.wpm', function (e) {
+    $(layoutBox).on('layoutchange.wpm', function(e) {
         keyboardMapper.changeMap(e.mapName);
     });
 
@@ -906,6 +953,11 @@
 
     var socialBox = new WPM.SocialBox($('#social-box'));
     $(game).on('scorechange.wpm', socialBox.scoreChanged);
+
+    var loginBox = new WPM.LoginBox($('#login-box'));
+    $(loginBox).on('userchange.wpm', function(e) {
+        socialBox.userChanged(e.user);
+    });
 
     // Start the game loop
     game.init();

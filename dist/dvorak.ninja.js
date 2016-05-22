@@ -1,4 +1,4 @@
-/*! dvorak.ninja 2015-04-13 */
+/*! dvorak.ninja 2016-05-22 */
 (function($) {
     'use strict';
 
@@ -902,6 +902,7 @@
     ];
 })();
 
+/* global ga */
 /* global WPM */
 (function($) {
     'use strict';
@@ -924,6 +925,7 @@
     var wordSetBox = new WPM.WordSetBox(WPM.wordSets, $('#word-set-box'));
     $(wordSetBox).on('wordlistchange.wpm', function(e) {
         game.changeWordList(e.name, e.wordList);
+        ga('send', 'event', 'WordList', 'change', e.name);
     });
 
     var typeBox = new WPM.TypeBox($('#type-box'), $('#overlay-box'));

@@ -1,3 +1,4 @@
+/* global ga */
 /* global WPM */
 (function($) {
     'use strict';

@@ -174,6 +174,7 @@
 
             $(that).trigger({
                 type: 'textchange.wpm',
+                mode: mode,
                 correctlyTyped: correctlyTyped,
                 incorrectlyTyped: incorrectlyTyped,
                 notYetTyped: notYetTyped,
@@ -207,6 +208,7 @@
 
             $(that).trigger({
                 type: 'textchange.wpm',
+                mode: mode,
                 correctlyTyped: correctlyTyped,
                 incorrectlyTyped: incorrectlyTyped,
                 notYetTyped: notYetTyped,

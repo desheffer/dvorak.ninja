@@ -25,16 +25,13 @@
         // Name of the current word set.
         var wordSetName;
 
-        // Current word list being typed, based on a word set.
-        var wordsToType;
-
-        // Text that has been correctly typed, a subset of wordsToType.
+        // Text that has been correctly typed.
         var correctlyTyped;
 
         // Text that has been incorrectly typed.
         var incorrectlyTyped;
 
-        // Text that has not yet been correctly typed, a subset of wordsToType.
+        // Text that has not yet been correctly typed.
         var notYetTyped;
 
         // Count of all letter presses for the current game.
@@ -124,7 +121,7 @@
             startTime = undefined;
 
             wordSetName = name;
-            wordsToType = notYetTyped = wordList;
+            notYetTyped = wordList;
             correctlyTyped = incorrectlyTyped = '';
             totalTyped = 0;
             times = [];

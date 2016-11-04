@@ -1,23 +1,52 @@
 {
-  "name": "dvorak.ninja",
-  "version": "0.1.0",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/desheffer/wpm.git"
-  },
-  "devDependencies": {
-    "bower": "^1.3.12",
-    "grunt": "^0.4.5",
-    "grunt-cli": "^0.1.13",
-    "grunt-contrib-clean": "^0.6.0",
-    "grunt-contrib-concat": "^0.5.1",
-    "grunt-contrib-copy": "^0.8.0",
-    "grunt-contrib-cssmin": "^0.12.2",
-    "grunt-contrib-jshint": "^0.11.0",
-    "grunt-contrib-less": "^1.0.0",
-    "grunt-contrib-nodeunit": "^0.4.1",
-    "grunt-contrib-uglify": "^0.8.0",
-    "load-grunt-tasks": "^3.1.0",
-    "time-grunt": "^1.1.0"
-  }
+    "name": "dvorak.ninja",
+    "version": "1.0.0",
+    "scripts": {
+        "start": "gulp",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "eslintConfig": {
+        "extends": "eslint:recommended",
+        "plugins": [
+            "import"
+        ],
+        "env": {
+            "browser": true,
+            "es6": true,
+            "jquery": true
+        },
+        "parserOptions": {
+            "sourceType": "module"
+        }
+    },
+    "babel": {
+        "presets": [
+            "latest"
+        ]
+    },
+    "devDependencies": {
+        "babel-loader": "^6.2.5",
+        "babel-preset-latest": "^6.16.0",
+        "bootstrap": "^3.3.7",
+        "del": "^2.2.2",
+        "eslint": "^3.8.1",
+        "eslint-config-standard": "^6.2.1",
+        "eslint-plugin-import": "^2.0.1",
+        "firebase": "^2.4.2",
+        "gulp": "^3.9.1",
+        "gulp-babel": "^6.1.2",
+        "gulp-concat": "^2.6.0",
+        "gulp-eslint": "^3.0.1",
+        "jquery": "^3.1.1",
+        "webpack-stream": "^3.2.0"
+    },
+    "dependencies": {
+        "babel-polyfill": "^6.16.0"
+    },
+    "repository": {
+        "url": "git@github.com:desheffer/dvorak.ninja.git",
+        "type": "git"
+    },
+    "author": "Doug Sheffer <doug.sheffer@researchsquare.com>",
+    "license": "GPL-3.0"
 }

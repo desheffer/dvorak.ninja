@@ -1,5 +1,5 @@
-/* global Firebase: false */
-(function($, Firebase) {
+/* global firebase */
+(function($, firebase) {
     'use strict';
 
     window.WPM = window.WPM || {};
@@ -7,7 +7,6 @@
     window.WPM.LoginBox = function(login) {
         var that = this;
 
-        var firebase = new Firebase(window.WPM.firebaseURL);
         var user;
 
         function djb2(str){
@@ -23,18 +22,19 @@
         }
 
         function updateLinks() {
-            if (user) {
-                login.find('.username').text(user.displayName);
+            if (user && user._displayName) {
+                login.find('.username').text(user._displayName);
             } else {
                 login.find('.username').text('---------');
             }
 
             login.find('.links').html('');
 
-            if (!user || user.provider === 'anonymous') {
+            if (!user || user.isAnonymous) {
                 $('<a href="#">Log in</a>')
                     .on('click', function () {
-                        firebase.authWithOAuthPopup('google', function() {});
+                        var provider = new firebase.auth.GoogleAuthProvider();
+                        firebase.auth().signInWithPopup(provider);
 
                         return false;
                     })
@@ -42,8 +42,7 @@
             } else {
                 $('<a href="#">Log out</a>')
                     .on('click', function () {
-                        firebase.unauth(function() {});
-                        firebase.authAnonymously(function() {});
+                        firebase.auth().signOut();
 
                         return false;
                     })
@@ -53,13 +52,15 @@
 
         this.init = function() {
             // Delay binding until something is listening.
-            firebase.onAuth(function(authData) {
-                user = authData;
+            firebase.auth().onAuthStateChanged(function(newUser) {
+                user = newUser;
 
-                if (user && user.provider === 'anonymous') {
-                    user.displayName = hashToName(user.uid);
-                } else if (user && user.provider === 'google') {
-                    user.displayName = user.google.displayName;
+                if (!user) {
+                    firebase.auth().signInAnonymously();
+                } else if (user.isAnonymous) {
+                    user._displayName = hashToName(user.uid);
+                } else {
+                    user._displayName = user.providerData[0].displayName;
                 }
 
                 updateLinks();
@@ -69,10 +70,6 @@
                     user: user,
                 });
             });
-
-            if (!firebase.getAuth()) {
-                firebase.authAnonymously(function() {});
-            }
         };
     };
-})($, Firebase);
+})($, firebase);

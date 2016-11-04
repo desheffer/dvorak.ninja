@@ -3,7 +3,13 @@
 
     window.WPM = window.WPM || {};
 
-    window.WPM.firebaseURL = "http://dvorak-ninja.firebaseio.com/";
+    window.WPM.firebaseConfig = {
+        apiKey: "AIzaSyD_T9vErOvAh65lJggNezBnV3BonIjsXQo",
+        authDomain: "dvorak-ninja.firebaseapp.com",
+        databaseURL: "https://dvorak-ninja.firebaseio.com",
+        storageBucket: "firebase-dvorak-ninja.appspot.com",
+        messagingSenderId: "632793632430"
+    };
 
     window.WPM.wordSets = [
         {

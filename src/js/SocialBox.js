@@ -1,5 +1,5 @@
-/* global Firebase: false */
-(function($, Firebase) {
+/* global firebase */
+(function($, firebase) {
     'use strict';
 
     window.WPM = window.WPM || {};
@@ -7,16 +7,16 @@
     window.WPM.SocialBox = function(social) {
         var modes = window.WPM.gameModes;
 
-        var firebase = new Firebase(window.WPM.firebaseURL);
         var user;
+        var userRef;
 
-        firebase.child('presence')
+        firebase.database().ref('presence')
             .on('value', function(snapshot) {
                 var count = Object.keys(snapshot.val()).length;
                 social.find('.user-count .value').text(count);
             });
 
-        firebase.child('score')
+        firebase.database().ref('score')
             .orderByChild('timestamp')
             .limitToLast(5)
             .on('child_added', function(snapshot) {
@@ -49,16 +49,11 @@
             });
 
         this.userChanged = function(newUser) {
-            // Remove presence for old session.
-            if (user) {
-                firebase.child('presence').child(user.uid).remove();
-            }
-
             user = newUser;
 
             // Add presence for new session.
-            if (user) {
-                var userRef = firebase.child('presence').child(user.uid);
+            if (user && !userRef) {
+                userRef = firebase.database().ref('presence').push();
                 userRef.onDisconnect().remove();
                 userRef.set(true);
             }
@@ -70,9 +65,9 @@
                 return;
             }
 
-            firebase.child('score').push({
+            firebase.database().ref('score').push({
                 user: {
-                    displayName: user.displayName,
+                    displayName: user._displayName,
                 },
                 timestamp: e.timeStamp,
                 wordSet: {
@@ -87,4 +82,4 @@
             });
         };
     };
-})($, Firebase);
+})($, firebase);

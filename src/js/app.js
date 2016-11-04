@@ -1,7 +1,10 @@
 /* global ga */
 /* global WPM */
-(function($) {
+/* global firebase */
+(function($, firebase) {
     'use strict';
+
+    firebase.initializeApp(WPM.firebaseConfig);
 
     // Game
     var game = new WPM.Game();
@@ -57,4 +60,4 @@
     game.init();
 
     $('#widget').show();
-})(jQuery);
+})(jQuery, firebase);

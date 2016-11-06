@@ -1,12 +1,10 @@
-(function($) {
-    'use strict';
+import Game from './Game';
 
-    window.WPM = window.WPM || {};
-
-    window.WPM.LayoutBox = function(qwertyContainer, dvorakContainer, mapQwertyToDvorakCheckbox) {
+export default class {
+    constructor(qwertyContainer, dvorakContainer, mapQwertyToDvorakCheckbox) {
         var that = this;
 
-        var modes = window.WPM.gameModes;
+        var modes = Game.modes;
 
         var layouts = {
             qwerty: [
@@ -72,5 +70,5 @@
 
         renderLayout(qwertyContainer, layouts.qwerty);
         renderLayout(dvorakContainer, layouts.dvorak);
-    };
-})(jQuery);
+    }
+}

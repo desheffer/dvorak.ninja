@@ -1,222 +1,217 @@
-(function($) {
-    'use strict';
-
-    window.WPM = window.WPM || {};
-
-    window.WPM.gameModes = {
-        IDLE: 'idle',
-        PREGAME: 'pregame',
-        PLAYING: 'playing',
-        POSTGAME: 'postgame',
-    };
-
-    window.WPM.Game = function() {
-        var that = this;
-
-        var modes = window.WPM.gameModes;
-        var timer;
+export default class {
+    constructor() {
+        this.timer = undefined;
 
         // Current game mode.
-        var mode;
+        this.mode = undefined;
 
         // Start time for the current game.
-        var startTime;
+        this.startTime = undefined;
 
         // Name of the current word set.
-        var wordSetName;
+        this.wordSetName = undefined;
 
-        // Text that has been correctly typed.
-        var correctlyTyped;
+        // Text this has been correctly typed.
+        this.correctlyTyped = undefined;
 
-        // Text that has been incorrectly typed.
-        var incorrectlyTyped;
+        // Text this has been incorrectly typed.
+        this.incorrectlyTyped = undefined;
 
-        // Text that has not yet been correctly typed.
-        var notYetTyped;
+        // Text this has not yet been correctly typed.
+        this.notYetTyped = undefined;
 
         // Count of all letter presses for the current game.
-        var totalTyped;
+        this.totalTyped = undefined;
 
         // Log of all correct letter presses.
-        var times;
+        this.times = undefined;
+    }
 
-        function currentMode() {
-            var hasText = notYetTyped !== undefined && notYetTyped.length > 0;
+    static get modes() {
+        return {
+            IDLE: 'idle',
+            PREGAME: 'pregame',
+            PLAYING: 'playing',
+            POSTGAME: 'postgame',
+        };
+    }
 
-            if (hasText && startTime === undefined) {
-                return modes.PREGAME;
-            } else if (hasText && startTime !== undefined) {
-                return modes.PLAYING;
-            } else if (!hasText && startTime !== undefined) {
-                return modes.POSTGAME;
-            }
-
-            return modes.IDLE;
+    init() {
+        if (this.mode !== undefined) {
+            return;
         }
 
-        function tick() {
-            clearInterval(timer);
-            timer = undefined;
+        this.tick();
+    }
 
-            var oldMode = mode;
-            mode = currentMode();
+    currentMode() {
+        var hasText = this.notYetTyped !== undefined && this.notYetTyped.length > 0;
 
-            // Trigger the score change event when the game mode is PLAYING or
-            // has just changed from PLAYING.
-            if (oldMode === modes.PLAYING || mode === modes.PLAYING) {
-                var seconds = ($.now() - startTime) / 1000;
-                var characters = correctlyTyped.length;
-                var words = correctlyTyped.length / 5;
-                var wpm = words / (seconds / 60);
-                var accuracy = characters / totalTyped * 100;
-
-                $(that).trigger({
-                    type: 'scorechange.wpm',
-                    mode: mode,
-                    seconds: seconds,
-                    characters: characters,
-                    words: words,
-                    wpm: wpm,
-                    accuracy: accuracy,
-                    wordSetName: wordSetName,
-                    times: times,
-                });
-            }
-
-            // Trigger the mode change event.
-            if (mode !== oldMode) {
-                $(that).trigger({
-                    type: 'modechange.wpm',
-                    mode: mode,
-                    oldMode: oldMode,
-                });
-            }
-
-            if (mode === modes.PREGAME || oldMode === modes.PREGAME) {
-                $(that).trigger({
-                    type: 'textchange.wpm',
-                    mode: mode,
-                    correctlyTyped: correctlyTyped,
-                    incorrectlyTyped: incorrectlyTyped,
-                    notYetTyped: notYetTyped,
-                    nextLetter: notYetTyped[0],
-                    change: 0,
-                });
-            }
-
-            if (mode === modes.PLAYING) {
-                timer = setTimeout(tick, 100);
-            }
+        if (hasText && this.startTime === undefined) {
+            return this.constructor.modes.PREGAME;
+        } else if (hasText && this.startTime !== undefined) {
+            return this.constructor.modes.PLAYING;
+        } else if (!hasText && this.startTime !== undefined) {
+            return this.constructor.modes.POSTGAME;
         }
 
-        this.init = function() {
-            if (mode !== undefined) {
-                return;
-            }
+        return this.constructor.modes.IDLE;
+    }
 
-            tick();
-        };
+    tick() {
+        clearInterval(this.timer);
+        this.timer = undefined;
 
-        this.changeWordList = function(name, wordList) {
-            startTime = undefined;
+        var oldMode = this.mode;
+        this.mode = this.currentMode();
 
-            wordSetName = name;
-            notYetTyped = wordList;
-            correctlyTyped = incorrectlyTyped = '';
-            totalTyped = 0;
-            times = [];
+        // Trigger the score change event when the game mode is PLAYING or
+        // has just changed from PLAYING.
+        if (oldMode === this.constructor.modes.PLAYING || this.mode === this.constructor.modes.PLAYING) {
+            var seconds = ($.now() - this.startTime) / 1000;
+            var characters = this.correctlyTyped.length;
+            var words = this.correctlyTyped.length / 5;
+            var wpm = words / (seconds / 60);
+            var accuracy = characters / this.totalTyped * 100;
 
-            tick();
-        };
-
-        this.start = function() {
-            if (mode !== modes.PREGAME) {
-                return;
-            }
-
-            startTime = $.now();
-            tick();
-        };
-
-        this.letterTyped = function(letter) {
-            if (mode === modes.PREGAME) {
-                this.start();
-                return;
-            }
-
-            if (mode !== modes.PLAYING) {
-                return;
-            }
-
-            totalTyped++;
-            var delta = 0;
-            var expected = notYetTyped.substr(0, 1);
-
-            if (incorrectlyTyped.length === 0 && letter === expected) {
-                // Add a correct letter
-                correctlyTyped = correctlyTyped + letter;
-                notYetTyped = notYetTyped.substr(1);
-                delta = 1;
-
-                var lastLetterTime = times.length > 0 ? times[times.length - 1].time : startTime;
-                var newLetterTime = $.now();
-                times.push({
-                    letter: letter,
-                    time: newLetterTime,
-                    duration: newLetterTime - lastLetterTime,
-                });
-            } else if (incorrectlyTyped.length <= 10) {
-                // Add an incorrect letter
-                incorrectlyTyped = incorrectlyTyped + letter;
-            } else {
-                return;
-            }
-
-            $(that).trigger({
-                type: 'textchange.wpm',
-                mode: mode,
-                correctlyTyped: correctlyTyped,
-                incorrectlyTyped: incorrectlyTyped,
-                notYetTyped: notYetTyped,
-                nextLetter: incorrectlyTyped ? false : notYetTyped[0],
-                change: delta,
+            $(this).trigger({
+                type: 'scorechange.wpm',
+                mode: this.mode,
+                seconds: seconds,
+                characters: characters,
+                words: words,
+                wpm: wpm,
+                accuracy: accuracy,
+                wordSetName: this.wordSetName,
+                times: this.times,
             });
+        }
 
-            tick();
-        };
-
-        this.backspaceTyped = function() {
-            if (mode !== modes.PLAYING) {
-                return;
-            }
-
-            var delta = 0;
-
-            if (incorrectlyTyped.length > 0) {
-                // Remove an incorrect letter
-                incorrectlyTyped = incorrectlyTyped.substr(0, incorrectlyTyped.length - 1);
-            } else if (correctlyTyped.length > 0) {
-                // Remove a correct letter
-                notYetTyped = correctlyTyped[correctlyTyped.length - 1] + notYetTyped;
-                correctlyTyped = correctlyTyped.substr(0, correctlyTyped.length - 1);
-                delta = -1;
-
-                times.pop();
-            } else {
-                return;
-            }
-
-            $(that).trigger({
-                type: 'textchange.wpm',
-                mode: mode,
-                correctlyTyped: correctlyTyped,
-                incorrectlyTyped: incorrectlyTyped,
-                notYetTyped: notYetTyped,
-                nextLetter: incorrectlyTyped ? false : notYetTyped[0],
-                change: delta,
+        // Trigger the mode change event.
+        if (this.mode !== oldMode) {
+            $(this).trigger({
+                type: 'modechange.wpm',
+                mode: this.mode,
+                oldMode: oldMode,
             });
+        }
 
-            tick();
-        };
-    };
-})(jQuery);
+        if (this.mode === this.constructor.modes.PREGAME || oldMode === this.constructor.modes.PREGAME) {
+            $(this).trigger({
+                type: 'textchange.wpm',
+                mode: this.mode,
+                correctlyTyped: this.correctlyTyped,
+                incorrectlyTyped: this.incorrectlyTyped,
+                notYetTyped: this.notYetTyped,
+                nextLetter: this.notYetTyped[0],
+                change: 0,
+            });
+        }
+
+        if (this.mode === this.constructor.modes.PLAYING) {
+            this.timer = setTimeout(this.tick.bind(this), 100);
+        }
+    }
+
+    changeWordList(name, wordList) {
+        this.startTime = undefined;
+
+        this.wordSetName = name;
+        this.notYetTyped = wordList;
+        this.correctlyTyped = this.incorrectlyTyped = '';
+        this.totalTyped = 0;
+        this.times = [];
+
+        this.tick();
+    }
+
+    start() {
+        if (this.mode !== this.constructor.modes.PREGAME) {
+            return;
+        }
+
+        this.startTime = $.now();
+        this.tick();
+    }
+
+    letterTyped(letter) {
+        if (this.mode === this.constructor.modes.PREGAME) {
+            this.start();
+            return;
+        }
+
+        if (this.mode !== this.constructor.modes.PLAYING) {
+            return;
+        }
+
+        this.totalTyped++;
+        var delta = 0;
+        var expected = this.notYetTyped.substr(0, 1);
+
+        if (this.incorrectlyTyped.length === 0 && letter === expected) {
+            // Add a correct letter
+            this.correctlyTyped = this.correctlyTyped + letter;
+            this.notYetTyped = this.notYetTyped.substr(1);
+            delta = 1;
+
+            var lastLetterTime = this.times.length > 0 ? this.times[this.times.length - 1].time : this.startTime;
+            var newLetterTime = $.now();
+            this.times.push({
+                letter: letter,
+                time: newLetterTime,
+                duration: newLetterTime - lastLetterTime,
+            });
+        } else if (this.incorrectlyTyped.length <= 10) {
+            // Add an incorrect letter
+            this.incorrectlyTyped = this.incorrectlyTyped + letter;
+        } else {
+            return;
+        }
+
+        $(this).trigger({
+            type: 'textchange.wpm',
+            mode: this.mode,
+            correctlyTyped: this.correctlyTyped,
+            incorrectlyTyped: this.incorrectlyTyped,
+            notYetTyped: this.notYetTyped,
+            nextLetter: this.incorrectlyTyped ? false : this.notYetTyped[0],
+            change: delta,
+        });
+
+        this.tick();
+    }
+
+    backspaceTyped() {
+        if (this.mode !== this.constructor.modes.PLAYING) {
+            return;
+        }
+
+        var delta = 0;
+
+        if (this.incorrectlyTyped.length > 0) {
+            // Remove an incorrect letter
+            this.incorrectlyTyped = this.incorrectlyTyped.substr(0, this.incorrectlyTyped.length - 1);
+        } else if (this.correctlyTyped.length > 0) {
+            // Remove a correct letter
+            this.notYetTyped = this.correctlyTyped[this.correctlyTyped.length - 1] + this.notYetTyped;
+            this.correctlyTyped = this.correctlyTyped.substr(0, this.correctlyTyped.length - 1);
+            delta = -1;
+
+            this.times.pop();
+        } else {
+            return;
+        }
+
+        $(this).trigger({
+            type: 'textchange.wpm',
+            mode: this.mode,
+            correctlyTyped: this.correctlyTyped,
+            incorrectlyTyped: this.incorrectlyTyped,
+            notYetTyped: this.notYetTyped,
+            nextLetter: this.incorrectlyTyped ? false : this.notYetTyped[0],
+            change: delta,
+        });
+
+        this.tick();
+    }
+}

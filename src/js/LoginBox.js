@@ -1,10 +1,7 @@
 /* global firebase */
-(function($, firebase) {
-    'use strict';
 
-    window.WPM = window.WPM || {};
-
-    window.WPM.LoginBox = function(login) {
+export default class {
+    constructor(login) {
         var that = this;
 
         var user;
@@ -71,5 +68,5 @@
                 });
             });
         };
-    };
-})($, firebase);
+    }
+}

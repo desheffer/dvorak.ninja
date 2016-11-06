@@ -1,11 +1,10 @@
 /* global firebase */
-(function($, firebase) {
-    'use strict';
 
-    window.WPM = window.WPM || {};
+import Game from './Game';
 
-    window.WPM.SocialBox = function(social) {
-        var modes = window.WPM.gameModes;
+export default class {
+    constructor(social) {
+        var modes = Game.modes;
 
         var user;
         var userRef;
@@ -81,5 +80,5 @@
                 },
             });
         };
-    };
-})($, firebase);
+    }
+}

@@ -1,10 +1,8 @@
-(function() {
-    'use strict';
+import Game from './Game';
 
-    window.WPM = window.WPM || {};
-
-    window.WPM.ScoreBox = function(score) {
-        var modes = window.WPM.gameModes;
+export default class {
+    constructor(score) {
+        var modes = Game.modes;
 
         function minAndMaxWpm(times) {
             var wpm = {};
@@ -102,5 +100,5 @@
             score.find('.missed .value').text(missed.splice(0, 5).join(' '));
             score.css('visibility', 'visible');
         };
-    };
-})();
+    }
+}

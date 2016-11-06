@@ -1,9 +1,5 @@
-(function($) {
-    'use strict';
-
-    window.WPM = window.WPM || {};
-
-    window.WPM.WordSetBox = function(wordSets, container) {
+export default class {
+    constructor(wordSets, container) {
         var that = this;
 
         function shuffle(arr) {
@@ -51,5 +47,5 @@
             $(this).addClass('active').blur();
             return false;
         });
-    };
-})(jQuery);
+    }
+}

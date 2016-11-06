@@ -1,10 +1,8 @@
-(function() {
-    'use strict';
+import Game from './Game';
 
-    window.WPM = window.WPM || {};
-
-    window.WPM.TypeBox = function(type, overlay) {
-        var modes = window.WPM.gameModes;
+export default class {
+    constructor(type, overlay) {
+        var modes = Game.modes;
 
         function htmlEscape(str) {
             return String(str)
@@ -103,5 +101,5 @@
                     .appendTo(results);
             }
         };
-    };
-})();
+    }
+}

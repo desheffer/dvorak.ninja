@@ -1,63 +1,71 @@
 /* global ga */
-/* global WPM */
 /* global firebase */
-(function($, firebase) {
-    'use strict';
 
-    firebase.initializeApp(WPM.firebaseConfig);
+import { Firebase, WordSets } from './Config';
+import Game from './Game';
+import KeyboardMapper from './KeyboardMapper';
+import Input from './Input';
+import WordSetBox from './WordSetBox';
+import TypeBox from './TypeBox';
+import StatsBox from './StatsBox';
+import LayoutBox from './LayoutBox';
+import ScoreBox from './ScoreBox';
+import SocialBox from './SocialBox';
+import LoginBox from './LoginBox';
 
-    // Game
-    var game = new WPM.Game();
+firebase.initializeApp(Firebase);
 
-    // Input
-    var keyboardMapper = new WPM.KeyboardMapper();
+// Game
+var game = new Game();
 
-    var input = new WPM.Input($(document), keyboardMapper);
-    $(input).on('letterpress.wpm', function(e) {
-        game.letterTyped(e.letter);
-    });
-    $(input).on('backspacepress.wpm', function() {
-        game.backspaceTyped();
-    });
+// Input
+var keyboardMapper = new KeyboardMapper();
 
-    // Views
-    var wordSetBox = new WPM.WordSetBox(WPM.wordSets, $('#word-set-box'));
-    $(wordSetBox).on('wordlistchange.wpm', function(e) {
-        game.changeWordList(e.name, e.wordList);
-        ga('send', 'event', 'WordList', 'change', e.name);
-    });
+var input = new Input($(document), keyboardMapper);
+$(input).on('letterpress.wpm', function(e) {
+    game.letterTyped(e.letter);
+});
+$(input).on('backspacepress.wpm', function() {
+    game.backspaceTyped();
+});
 
-    var typeBox = new WPM.TypeBox($('#type-box'), $('#overlay-box'));
-    $(game).on('modechange.wpm', typeBox.modeChanged);
-    $(game).on('textchange.wpm', typeBox.textChanged);
-    $(game).on('scorechange.wpm', typeBox.scoreChanged);
+// Views
+var wordSetBox = new WordSetBox(WordSets, $('#word-set-box'));
+$(wordSetBox).on('wordlistchange.wpm', function(e) {
+    game.changeWordList(e.name, e.wordList);
+    ga('send', 'event', 'WordList', 'change', e.name);
+});
 
-    var statsBox = new WPM.StatsBox($('#stats-box'));
-    $(game).on('modechange.wpm', statsBox.modeChanged);
-    $(game).on('scorechange.wpm', statsBox.scoreChanged);
+var typeBox = new TypeBox($('#type-box'), $('#overlay-box'));
+$(game).on('modechange.wpm', typeBox.modeChanged);
+$(game).on('textchange.wpm', typeBox.textChanged);
+$(game).on('scorechange.wpm', typeBox.scoreChanged);
 
-    var layoutBox = new WPM.LayoutBox($('#qwerty-layout'), $('#dvorak-layout'), $('#map-qwerty-to-dvorak'));
-    $(game).on('modechange.wpm', layoutBox.modeChanged);
-    $(game).on('textchange.wpm', layoutBox.textChanged);
-    $(layoutBox).on('layoutchange.wpm', function(e) {
-        keyboardMapper.changeMap(e.mapName);
-    });
+var statsBox = new StatsBox($('#stats-box'));
+$(game).on('modechange.wpm', statsBox.modeChanged);
+$(game).on('scorechange.wpm', statsBox.scoreChanged);
 
-    var scoreBox = new WPM.ScoreBox($('#score-box'));
-    $(game).on('modechange.wpm', scoreBox.modeChanged);
-    $(game).on('scorechange.wpm', scoreBox.scoreChanged);
+var layoutBox = new LayoutBox($('#qwerty-layout'), $('#dvorak-layout'), $('#map-qwerty-to-dvorak'));
+$(game).on('modechange.wpm', layoutBox.modeChanged);
+$(game).on('textchange.wpm', layoutBox.textChanged);
+$(layoutBox).on('layoutchange.wpm', function(e) {
+    keyboardMapper.changeMap(e.mapName);
+});
 
-    var socialBox = new WPM.SocialBox($('#social-box'));
-    $(game).on('scorechange.wpm', socialBox.scoreChanged);
+var scoreBox = new ScoreBox($('#score-box'));
+$(game).on('modechange.wpm', scoreBox.modeChanged);
+$(game).on('scorechange.wpm', scoreBox.scoreChanged);
 
-    var loginBox = new WPM.LoginBox($('#login-box'));
-    $(loginBox).on('userchange.wpm', function(e) {
-        socialBox.userChanged(e.user);
-    });
-    loginBox.init();
+var socialBox = new SocialBox($('#social-box'));
+$(game).on('scorechange.wpm', socialBox.scoreChanged);
 
-    // Start the game loop
-    game.init();
+var loginBox = new LoginBox($('#login-box'));
+$(loginBox).on('userchange.wpm', function(e) {
+    socialBox.userChanged(e.user);
+});
+loginBox.init();
 
-    $('#widget').show();
-})(jQuery, firebase);
+// Start the game loop
+game.init();
+
+$('#widget').show();

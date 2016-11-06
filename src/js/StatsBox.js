@@ -1,10 +1,8 @@
-(function() {
-    'use strict';
+import Game from './Game';
 
-    window.WPM = window.WPM || {};
-
-    window.WPM.StatsBox = function(stats) {
-        var modes = window.WPM.gameModes;
+export default class {
+    constructor(stats) {
+        var modes = Game.modes;
 
         this.modeChanged = function(e) {
             if (e.mode === modes.PREGAME || e.mode === modes.IDLE) {
@@ -28,5 +26,5 @@
             stats.find('.characters .value').text(~~e.characters);
             stats.find('.time .value').text(time);
         };
-    };
-})();
+    }
+}

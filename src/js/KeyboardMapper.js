@@ -1,9 +1,5 @@
-(function() {
-    'use strict';
-
-    window.WPM = window.WPM || {};
-
-    window.WPM.KeyboardMapper = function() {
+export default class {
+    constructor() {
         var maps = {
             null: {},
             qwertyToDvorak: {
@@ -35,5 +31,5 @@
                 mapName = null;
             }
         };
-    };
-})();
+    }
+}

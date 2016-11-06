@@ -1,9 +1,5 @@
-(function($) {
-    'use strict';
-
-    window.WPM = window.WPM || {};
-
-    window.WPM.Input = function(document, keyboardMapper) {
+export default class {
+    constructor(document, keyboardMapper) {
         var that = this;
 
         document.on('keydown', function(e) {
@@ -34,5 +30,5 @@
                 return false;
             }
         });
-    };
-})(jQuery);
+    }
+}

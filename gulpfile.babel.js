@@ -18,7 +18,7 @@ const paths = {
         'node_modules/firebase/firebase.js',
     ],
     js: 'src/**/*.js?(x)',
-    entryPoint: 'src/js/app.js',
+    entryPoint: 'src/js/index.jsx',
     distDir: 'dist',
 };
 

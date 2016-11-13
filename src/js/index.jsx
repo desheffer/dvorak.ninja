@@ -1,13 +1,17 @@
 /* global ga */
 /* global firebase */
 
+import 'babel-polyfill';
+import React from 'react';
+import { render } from 'react-dom'
+
 import { Firebase, WordSets } from './Config';
 import Game from './Game';
+import GameModes from './GameModes';
 import KeyboardMapper from './KeyboardMapper';
 import Input from './Input';
 import WordSetBox from './WordSetBox';
 import TypeBox from './TypeBox';
-import StatsBox from './StatsBox';
 import LayoutBox from './LayoutBox';
 import ScoreBox from './ScoreBox';
 import SocialBox from './SocialBox';
@@ -15,8 +19,10 @@ import LoginBox from './LoginBox';
 
 firebase.initializeApp(Firebase);
 
-// Game
-var game = new Game();
+var game = render(
+    <Game />,
+    document.getElementById('root')
+);
 
 // Input
 var keyboardMapper = new KeyboardMapper();
@@ -40,10 +46,6 @@ var typeBox = new TypeBox($('#type-box'), $('#overlay-box'));
 $(game).on('modechange.wpm', typeBox.modeChanged);
 $(game).on('textchange.wpm', typeBox.textChanged);
 $(game).on('scorechange.wpm', typeBox.scoreChanged);
-
-var statsBox = new StatsBox($('#stats-box'));
-$(game).on('modechange.wpm', statsBox.modeChanged);
-$(game).on('scorechange.wpm', statsBox.scoreChanged);
 
 var layoutBox = new LayoutBox($('#qwerty-layout'), $('#dvorak-layout'), $('#map-qwerty-to-dvorak'));
 $(game).on('modechange.wpm', layoutBox.modeChanged);

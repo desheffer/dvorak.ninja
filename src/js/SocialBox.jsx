@@ -1,11 +1,9 @@
 /* global firebase */
 
-import Game from './Game';
+import GameModes from './GameModes';
 
 export default class {
     constructor(social) {
-        var modes = Game.modes;
-
         var user;
         var userRef;
 
@@ -60,7 +58,7 @@ export default class {
         };
 
         this.scoreChanged = function(e) {
-            if (e.mode !== modes.POSTGAME) {
+            if (e.mode !== GameModes.POSTGAME) {
                 return;
             }
 

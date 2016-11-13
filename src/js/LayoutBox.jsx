@@ -1,10 +1,8 @@
-import Game from './Game';
+import GameModes from './GameModes';
 
 export default class {
     constructor(qwertyContainer, dvorakContainer, mapQwertyToDvorakCheckbox) {
         var that = this;
-
-        var modes = Game.modes;
 
         var layouts = {
             qwerty: [
@@ -43,7 +41,7 @@ export default class {
         };
 
         this.textChanged = function(e) {
-            if (e.mode !== modes.PLAYING) {
+            if (e.mode !== GameModes.PLAYING) {
                 return;
             }
 

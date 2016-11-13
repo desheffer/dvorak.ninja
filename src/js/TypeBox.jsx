@@ -1,9 +1,7 @@
-import Game from './Game';
+import GameModes from './GameModes';
 
 export default class {
     constructor(type, overlay) {
-        var modes = Game.modes;
-
         function htmlEscape(str) {
             return String(str)
                 .replace(/&/g, '&amp;')
@@ -13,13 +11,13 @@ export default class {
         }
 
         this.modeChanged = function(e) {
-            if (e.mode === modes.IDLE) {
+            if (e.mode === GameModes.IDLE) {
                 overlay.html('&mdash; Select a word set from above &mdash;').show();
                 type.html('');
-            } else if (e.mode === modes.PREGAME) {
+            } else if (e.mode === GameModes.PREGAME) {
                 overlay.html('&mdash; Press any key to begin &mdash;').show();
                 type.html('<span class="remaining"></span>');
-            } else if (e.mode === modes.PLAYING) {
+            } else if (e.mode === GameModes.PLAYING) {
                 overlay.html('').hide();
                 type.html(
                     '<span class="correct"></span>' +
@@ -29,7 +27,7 @@ export default class {
                 );
             }
 
-            type.toggleClass('completed', e.mode === modes.POSTGAME);
+            type.toggleClass('completed', e.mode === GameModes.POSTGAME);
         };
 
         this.textChanged = function(e) {
@@ -72,7 +70,7 @@ export default class {
         };
 
         this.scoreChanged = function(e) {
-            if (e.mode !== modes.POSTGAME) {
+            if (e.mode !== GameModes.POSTGAME) {
                 return;
             }
 

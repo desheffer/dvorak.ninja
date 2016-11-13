@@ -1,5 +1,20 @@
-export default class {
-    constructor() {
+import React from 'react';
+
+import GameModes from './GameModes';
+import StatsBox from './components/StatsBox';
+
+class Game extends React.Component {
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            mode: GameModes.IDLE,
+            wpm: 0,
+            accuracy: 0,
+            characters: 0,
+            seconds: 0,
+        };
+
         this.timer = undefined;
 
         // Current game mode.
@@ -27,15 +42,6 @@ export default class {
         this.times = undefined;
     }
 
-    static get modes() {
-        return {
-            IDLE: 'idle',
-            PREGAME: 'pregame',
-            PLAYING: 'playing',
-            POSTGAME: 'postgame',
-        };
-    }
-
     init() {
         if (this.mode !== undefined) {
             return;
@@ -48,14 +54,14 @@ export default class {
         var hasText = this.notYetTyped !== undefined && this.notYetTyped.length > 0;
 
         if (hasText && this.startTime === undefined) {
-            return this.constructor.modes.PREGAME;
+            return GameModes.PREGAME;
         } else if (hasText && this.startTime !== undefined) {
-            return this.constructor.modes.PLAYING;
+            return GameModes.PLAYING;
         } else if (!hasText && this.startTime !== undefined) {
-            return this.constructor.modes.POSTGAME;
+            return GameModes.POSTGAME;
         }
 
-        return this.constructor.modes.IDLE;
+        return GameModes.IDLE;
     }
 
     tick() {
@@ -67,7 +73,7 @@ export default class {
 
         // Trigger the score change event when the game mode is PLAYING or
         // has just changed from PLAYING.
-        if (oldMode === this.constructor.modes.PLAYING || this.mode === this.constructor.modes.PLAYING) {
+        if (oldMode === GameModes.PLAYING || this.mode === GameModes.PLAYING) {
             var seconds = ($.now() - this.startTime) / 1000;
             var characters = this.correctlyTyped.length;
             var words = this.correctlyTyped.length / 5;
@@ -85,6 +91,13 @@ export default class {
                 wordSetName: this.wordSetName,
                 times: this.times,
             });
+
+            this.setState({
+                wpm: wpm,
+                accuracy: accuracy,
+                characters: characters,
+                seconds: seconds,
+            });
         }
 
         // Trigger the mode change event.
@@ -94,9 +107,13 @@ export default class {
                 mode: this.mode,
                 oldMode: oldMode,
             });
+
+            this.setState({
+                mode: this.mode,
+            });
         }
 
-        if (this.mode === this.constructor.modes.PREGAME || oldMode === this.constructor.modes.PREGAME) {
+        if (this.mode === GameModes.PREGAME || oldMode === GameModes.PREGAME) {
             $(this).trigger({
                 type: 'textchange.wpm',
                 mode: this.mode,
@@ -108,7 +125,7 @@ export default class {
             });
         }
 
-        if (this.mode === this.constructor.modes.PLAYING) {
+        if (this.mode === GameModes.PLAYING) {
             this.timer = setTimeout(this.tick.bind(this), 100);
         }
     }
@@ -126,7 +143,7 @@ export default class {
     }
 
     start() {
-        if (this.mode !== this.constructor.modes.PREGAME) {
+        if (this.mode !== GameModes.PREGAME) {
             return;
         }
 
@@ -135,12 +152,12 @@ export default class {
     }
 
     letterTyped(letter) {
-        if (this.mode === this.constructor.modes.PREGAME) {
+        if (this.mode === GameModes.PREGAME) {
             this.start();
             return;
         }
 
-        if (this.mode !== this.constructor.modes.PLAYING) {
+        if (this.mode !== GameModes.PLAYING) {
             return;
         }
 
@@ -182,7 +199,7 @@ export default class {
     }
 
     backspaceTyped() {
-        if (this.mode !== this.constructor.modes.PLAYING) {
+        if (this.mode !== GameModes.PLAYING) {
             return;
         }
 
@@ -214,4 +231,12 @@ export default class {
 
         this.tick();
     }
+
+    render() {
+        return (
+            <StatsBox gameMode={this.state.mode} wpm={this.state.wpm} accuracy={this.state.accuracy} characters={this.state.characters} seconds={this.state.seconds} />
+        );
+    }
 }
+
+export default Game;

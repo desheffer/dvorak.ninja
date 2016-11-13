@@ -1,9 +1,7 @@
-import Game from './Game';
+import GameModes from './GameModes';
 
 export default class {
     constructor(score) {
-        var modes = Game.modes;
-
         function minAndMaxWpm(times) {
             var wpm = {};
             var cpsToWpm = 60 / 5;
@@ -75,7 +73,7 @@ export default class {
         }
 
         this.modeChanged = function(e) {
-            if (e.mode !== modes.POSTGAME) {
+            if (e.mode !== GameModes.POSTGAME) {
                 score.css('visibility', 'hidden');
                 score.find('.min .value1').text('--');
                 score.find('.min .value5').text('--');
@@ -86,7 +84,7 @@ export default class {
         };
 
         this.scoreChanged = function(e) {
-            if (e.mode !== modes.POSTGAME) {
+            if (e.mode !== GameModes.POSTGAME) {
                 return;
             }
 

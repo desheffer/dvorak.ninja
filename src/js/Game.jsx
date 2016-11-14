@@ -2,6 +2,7 @@ import React from 'react';
 
 import GameModes from './GameModes';
 import StatsBox from './components/StatsBox';
+import TypeBox from './components/TypeBox';
 
 class Game extends React.Component {
     constructor(props) {
@@ -123,6 +124,12 @@ class Game extends React.Component {
                 nextLetter: this.notYetTyped[0],
                 change: 0,
             });
+
+            this.setState({
+                correctlyTyped: this.correctlyTyped,
+                incorrectlyTyped: this.incorrectlyTyped,
+                notYetTyped: this.notYetTyped,
+            });
         }
 
         if (this.mode === GameModes.PLAYING) {
@@ -195,6 +202,12 @@ class Game extends React.Component {
             change: delta,
         });
 
+        this.setState({
+            correctlyTyped: this.correctlyTyped,
+            incorrectlyTyped: this.incorrectlyTyped,
+            notYetTyped: this.notYetTyped,
+        });
+
         this.tick();
     }
 
@@ -229,12 +242,21 @@ class Game extends React.Component {
             change: delta,
         });
 
+        this.setState({
+            correctlyTyped: this.correctlyTyped,
+            incorrectlyTyped: this.incorrectlyTyped,
+            notYetTyped: this.notYetTyped,
+        });
+
         this.tick();
     }
 
     render() {
         return (
-            <StatsBox gameMode={this.state.mode} wpm={this.state.wpm} accuracy={this.state.accuracy} characters={this.state.characters} seconds={this.state.seconds} />
+            <div>
+                <TypeBox gameMode={this.state.mode} onLetterTyped={this.letterTyped} onBackspaceTyped={this.onBackspaceTyped} correctlyTyped={this.state.correctlyTyped} incorrectlyTyped={this.state.incorrectlyTyped} notYetTyped={this.state.notYetTyped} />
+                <StatsBox gameMode={this.state.mode} wpm={this.state.wpm} accuracy={this.state.accuracy} characters={this.state.characters} seconds={this.state.seconds} />
+            </div>
         );
     }
 }

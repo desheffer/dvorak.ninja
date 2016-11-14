@@ -7,11 +7,9 @@ import { render } from 'react-dom'
 
 import { Firebase, WordSets } from './Config';
 import Game from './Game';
-import GameModes from './GameModes';
 import KeyboardMapper from './KeyboardMapper';
 import Input from './Input';
 import WordSetBox from './WordSetBox';
-import TypeBox from './TypeBox';
 import LayoutBox from './LayoutBox';
 import ScoreBox from './ScoreBox';
 import SocialBox from './SocialBox';
@@ -41,11 +39,6 @@ $(wordSetBox).on('wordlistchange.wpm', function(e) {
     game.changeWordList(e.name, e.wordList);
     ga('send', 'event', 'WordList', 'change', e.name);
 });
-
-var typeBox = new TypeBox($('#type-box'), $('#overlay-box'));
-$(game).on('modechange.wpm', typeBox.modeChanged);
-$(game).on('textchange.wpm', typeBox.textChanged);
-$(game).on('scorechange.wpm', typeBox.scoreChanged);
 
 var layoutBox = new LayoutBox($('#qwerty-layout'), $('#dvorak-layout'), $('#map-qwerty-to-dvorak'));
 $(game).on('modechange.wpm', layoutBox.modeChanged);

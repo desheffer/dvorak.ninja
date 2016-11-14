@@ -10,7 +10,6 @@ import KeyboardMapper from './KeyboardMapper';
 import Input from './Input';
 import WordSetBox from './WordSetBox';
 import LayoutBox from './LayoutBox';
-import ScoreBox from './ScoreBox';
 
 var game = render(
     <Game />,
@@ -41,10 +40,6 @@ $(game).on('textchange.wpm', layoutBox.textChanged);
 $(layoutBox).on('layoutchange.wpm', function(e) {
     keyboardMapper.changeMap(e.mapName);
 });
-
-var scoreBox = new ScoreBox($('#score-box'));
-$(game).on('modechange.wpm', scoreBox.modeChanged);
-$(game).on('scorechange.wpm', scoreBox.scoreChanged);
 
 // Start the game loop
 game.init();

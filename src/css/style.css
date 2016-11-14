@@ -11,10 +11,6 @@ header h1 {
     font-size: 1.25em;
     margin: 0.75em 0;
 }
-header .login {
-    margin: 1em 0;
-    text-align: right;
-}
 #widget {
     display: none;
 }
@@ -107,11 +103,8 @@ header .login {
     font-size: 1.2em;
     text-align: center;
 }
-.nav-tabs {
+.layouts {
     margin-top: 2em;
-}
-.tab-pane {
-    padding-top: 2em;
 }
 .layouts .map {
     cursor: pointer;

@@ -1,11 +1,3 @@
-export const Firebase = {
-    apiKey: "AIzaSyD_T9vErOvAh65lJggNezBnV3BonIjsXQo",
-    authDomain: "dvorak-ninja.firebaseapp.com",
-    databaseURL: "https://dvorak-ninja.firebaseio.com",
-    storageBucket: "firebase-dvorak-ninja.appspot.com",
-    messagingSenderId: "632793632430",
-};
-
 export const WordSets = [
     {
         name: "Dvorak 1 [aeouhtns]",

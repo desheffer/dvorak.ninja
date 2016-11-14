@@ -1,21 +1,16 @@
 /* global ga */
-/* global firebase */
 
 import 'babel-polyfill';
 import React from 'react';
 import { render } from 'react-dom'
 
-import { Firebase, WordSets } from './Config';
+import { WordSets } from './Config';
 import Game from './Game';
 import KeyboardMapper from './KeyboardMapper';
 import Input from './Input';
 import WordSetBox from './WordSetBox';
 import LayoutBox from './LayoutBox';
 import ScoreBox from './ScoreBox';
-import SocialBox from './SocialBox';
-import LoginBox from './LoginBox';
-
-firebase.initializeApp(Firebase);
 
 var game = render(
     <Game />,
@@ -50,15 +45,6 @@ $(layoutBox).on('layoutchange.wpm', function(e) {
 var scoreBox = new ScoreBox($('#score-box'));
 $(game).on('modechange.wpm', scoreBox.modeChanged);
 $(game).on('scorechange.wpm', scoreBox.scoreChanged);
-
-var socialBox = new SocialBox($('#social-box'));
-$(game).on('scorechange.wpm', socialBox.scoreChanged);
-
-var loginBox = new LoginBox($('#login-box'));
-$(loginBox).on('userchange.wpm', function(e) {
-    socialBox.userChanged(e.user);
-});
-loginBox.init();
 
 // Start the game loop
 game.init();

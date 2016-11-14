@@ -19,17 +19,7 @@
         <header>
             <nav role="navigation">
                 <div class="container">
-                    <div class="row">
-                        <div class="col-sm-6">
-                            <h1>Dvorak Ninja</h1>
-                        </div>
-                        <div class="col-sm-6">
-                            <div id="login-box" class="login">
-                                <span class="username">----------</span> |
-                                <span class="links">------</span>
-                            </div>
-                        </div>
-                    </div>
+                    <h1>Dvorak Ninja</h1>
                 </div>
             </nav>
         </header>
@@ -47,49 +37,19 @@
 
             <div id="root"></div>
 
-            <div role="tabpanel">
-                <div class="container">
-                    <ul class="nav nav-tabs" role="tablist">
-                        <li role="presentation" class="active"><a href="#layouts-tab" role="tab" data-toggle="tab">Layouts</a></li>
-                        <li role="presentation"><a href="#social-tab" role="tab" data-toggle="tab">Social</a></li>
-                    </ul>
-
-                    <div class="tab-content">
-                        <div role="tabpanel" id="layouts-tab" class="tab-pane active layouts">
-                            <div class="row">
-                                <div class="col-sm-12 col-md-6 text-center">
-                                    <h4>Qwerty</h4>
-                                    <div id="qwerty-layout" class="keyboard"></div>
-                                </div>
-                                <div class="col-sm-12 col-md-6 text-center">
-                                    <h4>Dvorak</h4>
-                                    <div id="dvorak-layout" class="keyboard"></div>
-                                    <label class="map">
-                                        <input id="map-qwerty-to-dvorak" type="checkbox"/> map from Qwerty
-                                    </label>
-                                </div>
-                            </div>
+            <div class="container">
+                <div class="layouts">
+                    <div class="row">
+                        <div class="col-sm-12 col-md-6 text-center">
+                            <h4>Qwerty</h4>
+                            <div id="qwerty-layout" class="keyboard"></div>
                         </div>
-
-                        <div role="tabpanel" id="social-tab" class="tab-pane social">
-                            <div class="row">
-                                <div id="social-box" class="col-md-12">
-                                    <table class="table table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th>Player</th>
-                                                <th>WPM</th>
-                                                <th>Accuracy</th>
-                                                <th>Characters</th>
-                                                <th>Time</th>
-                                                <th>Word Set</th>
-                                                <th>Date</th>
-                                            </tr>
-                                        </thead>
-                                    </table>
-                                    <div class="user-count"><span class="value">??</span> currently online</div>
-                                </div>
-                            </div>
+                        <div class="col-sm-12 col-md-6 text-center">
+                            <h4>Dvorak</h4>
+                            <div id="dvorak-layout" class="keyboard"></div>
+                            <label class="map">
+                                <input id="map-qwerty-to-dvorak" type="checkbox"/> map from Qwerty
+                            </label>
                         </div>
                     </div>
                 </div>
